@@ -7,14 +7,13 @@ pickled_data
 *.html
 *.mp4
 nexullance/*.ipynb
-nexullance/Cut_Euler_uniform.py
+# nexullance/Cut_Euler_uniform.py
 archive/
 LF_archive/
 nexullance/bin
 nexullance/profiling/**.csv
 nexullance/profiling/**.pkl
 # *.csv
-
 
 # white listing
 !nexullance/*.ipynb

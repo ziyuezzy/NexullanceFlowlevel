@@ -1,7 +1,9 @@
 # topology-research
 
 # required python packages:
-numpy, matplotlib, networkx, joblib (for multi-thread cpu algorithms), galois (for slimfly), gurobipy, (pynauty)
+numpy, networkx, galois
+, (matplotlib), if you want to plot
+, (joblib (for multi-thread cpu algorithms)), if you want to launch parallel algorithms (for slimfly), gurobipy, (pynauty)
 
 # classes in folder "topolgies/":
 Slimfly, RRG and Equality are implemented as child classes of "HPC_topo" which are based on undiretional graphs.
