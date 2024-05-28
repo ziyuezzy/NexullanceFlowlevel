@@ -301,13 +301,13 @@ def clean_up_weighted_paths(weighted_path_dict):
                 w=round(1-check_sum, 3)
                 assert(abs(w-weight)<0.01)
                 if weight > 0.001:
-                    weighted_paths.append((path, w))
+                    weighted_paths.append((path, float(w)))
                 else:
                     weighted_paths[-1]=(weighted_paths[-1][0],weighted_paths[-1][1]+w )
             else:
                 if weight > 0.001:
                     check_sum += weight
-                    weighted_paths.append((path, weight))
+                    weighted_paths.append((path, float(weight)))
         clean_weighted_path_dict[(u,v)]=weighted_paths
     return clean_weighted_path_dict
 

@@ -89,10 +89,9 @@ Nexullance_IT: a heuristic to be developed
 
 
 # TODOs: 
-test Nexullance_OPT, Nexullance_MP 
-write a function to calculate $\Phi$ ( first check $\mu$ value )
 
-implement Nexullance_IT
+Optimize alpha and beta for a set of traffic demand matrices together.
+Optimize the routing table (Nexullance) for a set of traffic demand matrices together.(?)
 
 
 Bayesian Optimization: 
