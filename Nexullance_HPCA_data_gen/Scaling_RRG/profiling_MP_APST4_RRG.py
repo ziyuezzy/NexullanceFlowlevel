@@ -24,7 +24,7 @@ def main():
 
     with open(filename, 'a', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lremote_MAX_ECMP_APST4', 'Llocal_MAX_ECM_APST4', 'Phi_ECMP_APST4[GBps]', 'Lremote_NEXU_MP_APST4', 'Phi_NEXU[GBps]', 'init_time[s]', 'solving_time[s]', 'peak_RAM[MB]'])
+        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lcore_MAX_ECMP_APST4', 'Laccess_MAX_ECM_APST4', 'Phi_ECMP_APST4[GBps]', 'Lcore_NEXU_MP_APST4', 'Phi_NEXU[GBps]', 'init_time[s]', 'solving_time[s]', 'peak_RAM[MB]'])
         
 
         # configs = [(16, 5), (25, 6)]
@@ -64,8 +64,8 @@ def main():
 def profile(config: tuple, traffic_pattern: str, _shift: int):
     EPR=(config[1]+1)//2
     _network = RRGtopo(config[0], config[1])
-    Cap_remote = 10 #GBps
-    Cap_local = 10 #GBps
+    Cap_core = 10 #GBps
+    Cap_access = 10 #GBps
     M_EPs = None
     if traffic_pattern == "uniform":
         M_EPs = gl.generate_uniform_traffic_pattern(config[0], EPR)
@@ -80,45 +80,45 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     # apply simple ECMP_ASP: (to make sure the input matrix for all nexu methods are the same)
     ASP, _ = _network.calculate_all_shortest_paths()
     ECMP_ASP = gl.ECMP(ASP)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
     # adapt the traffic scaling factor to 10x saturation
-    traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+    traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
     M_EPs = traffic_scaling * M_EPs
     M_R = gl.convert_M_EPs_to_M_R(M_EPs, config[0], EPR)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-    # max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
-    # print("Max remote link load: ", max_remote_link_load)
-    # print("Max local link load: ", max_local_link_load)
-    # ECMP_ASP_Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+    # max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
+    # print("Max core link load: ", max_core_link_load)
+    # print("Max access link load: ", max_access_link_load)
+    # ECMP_ASP_Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
 
 
     # apply simple ECMP_MP_APST4:
     MP_APST4, _ = _network.calculate_all_paths_within_length(4)
     ECMP_MP_APST4 = gl.ECMP(MP_APST4)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_MP_APST4, EPR, M_EPs)
-    max_remote_link_load_APST_4 = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load_APST_4 = np.max(local_link_flows)/Cap_local
-    ECMP_MP_APST4_Phi=gl.network_total_throughput(M_EPs, max_remote_link_load_APST_4, max_local_link_load_APST_4)
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_MP_APST4, EPR, M_EPs)
+    max_core_link_load_APST_4 = np.max(core_link_flows)/Cap_core
+    max_access_link_load_APST_4 = np.max(access_link_flows)/Cap_access
+    ECMP_MP_APST4_Phi=gl.network_total_throughput(M_EPs, max_core_link_load_APST_4, max_access_link_load_APST_4)
 
 
     tracemalloc.start()
     start_time = time.time()
-    nexu = Nexullance_MP(_network.nx_graph, MP_APST4, M_R, Cap_remote, 0, False)
+    nexu = Nexullance_MP(_network.nx_graph, MP_APST4, M_R, Cap_core, 0, False)
     nexu.init_model()
     middle_time = time.time()
-    Lremote_NEXU_MP_MP_APST4, _ = nexu.solve()
-    # Lremote_NEXU_MP_MP_APST4, weighted_path_dict = nexu.solve()
+    Lcore_NEXU_MP_MP_APST4, _ = nexu.solve()
+    # Lcore_NEXU_MP_MP_APST4, weighted_path_dict = nexu.solve()
     end_time = time.time()
     peak_RAM = tracemalloc.get_traced_memory()[1]
-    Phi_NEXU_MP_MP_APST4 = gl.network_total_throughput(M_EPs, Lremote_NEXU_MP_MP_APST4, max_local_link_load)
+    Phi_NEXU_MP_MP_APST4 = gl.network_total_throughput(M_EPs, Lcore_NEXU_MP_MP_APST4, max_access_link_load)
     # pickle.dump(weighted_path_dict, open(f"./picked_path_dicts/Nexullance_MP_MP_APST4_RRG_{config[0]}_{config[1]}_{traffic_pattern}_{_shift}.pkl", "wb"))
 
     # current and peak memory usages are: {tracemalloc.get_traced_memory()} B")
 
-    return [max_remote_link_load_APST_4, max_local_link_load_APST_4, ECMP_MP_APST4_Phi, Lremote_NEXU_MP_MP_APST4, Phi_NEXU_MP_MP_APST4, middle_time - start_time, end_time - middle_time, peak_RAM]
+    return [max_core_link_load_APST_4, max_access_link_load_APST_4, ECMP_MP_APST4_Phi, Lcore_NEXU_MP_MP_APST4, Phi_NEXU_MP_MP_APST4, middle_time - start_time, end_time - middle_time, peak_RAM]
 
 if __name__ == '__main__':
     main()

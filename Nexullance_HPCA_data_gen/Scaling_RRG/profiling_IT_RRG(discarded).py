@@ -29,8 +29,8 @@ def main():
 
     with open(filename, 'a', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lremote_MAX_ECMP_ASP', 'Llocal_MAX_ECMP_ASP', 'Phi_ECMP_ASP[GBps]', 
-                            'Lremote_NEXU_IT', 'Phi_NEXU[GBps]', 'method1_times[s]', 'method1_peak_RAMs[MB]', 'method1_results[GBps]',
+        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lcore_MAX_ECMP_ASP', 'Laccess_MAX_ECMP_ASP', 'Phi_ECMP_ASP[GBps]', 
+                            'Lcore_NEXU_IT', 'Phi_NEXU[GBps]', 'method1_times[s]', 'method1_peak_RAMs[MB]', 'method1_results[GBps]',
                             'method2_time[s]', 'method2_attempts', 'method2_peak_RAM[MB]'])
         
         # configs = [(16, 5), (25, 6), (36, 7), (49, 8), (64, 9), (81, 10) , (100, 11)]
@@ -69,8 +69,8 @@ def main():
 def profile(config: tuple, traffic_pattern: str, _shift: int):
     EPR=(config[1]+1)//2
     _network = RRGtopo(config[0], config[1])
-    Cap_remote = 10 #GBps
-    Cap_local = 10 #GBps
+    Cap_core = 10 #GBps
+    Cap_access = 10 #GBps
     M_EPs = None
     if traffic_pattern == "uniform":
         M_EPs = gl.generate_uniform_traffic_pattern(config[0], EPR)
@@ -85,19 +85,19 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     # apply simple ECMP:
     ASP, _ = _network.calculate_all_shortest_paths()
     ECMP = gl.ECMP(ASP)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
     # adapt the traffic scaling factor to 10x saturation
-    traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+    traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
     M_EPs = traffic_scaling * M_EPs
     M_R = gl.convert_M_EPs_to_M_R(M_EPs, config[0], EPR)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
-    # print("Max remote link load: ", max_remote_link_load)
-    # print("Max local link load: ", max_local_link_load)
-    ECMP_Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
+    # print("Max core link load: ", max_core_link_load)
+    # print("Max access link load: ", max_access_link_load)
+    ECMP_Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
 
     alpha_1 = 40.0
     beta_1 = 0.4
@@ -108,16 +108,16 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     def weighted_method_2(s: int, d: int, edge_attributes: dict):
         return alpha_2 + edge_attributes['load']**beta_2
 
-    nexu_it = Nexullance_IT(_network.nx_graph, M_R, Cap_remote)
+    nexu_it = Nexullance_IT(_network.nx_graph, M_R, Cap_core)
     times_method_1, peakRAMs_method_1, time_method_2, peakRAM_method_2, results_method_1 = nexu_it.optimize_and_profile(
     num_method_1, num_method_2, weighted_method_1, weighted_method_2, config[0], True)
 
-    Lremote_NEXU_IT=nexu_it.get_result_max_link_load()
+    Lcore_NEXU_IT=nexu_it.get_result_max_link_load()
     method_2_attempts=nexu_it.get_method_2_attempts()
-    Phi_NEXU_IT = gl.network_total_throughput(M_EPs, Lremote_NEXU_IT, max_local_link_load)
-    results_method_1 = [gl.network_total_throughput(M_EPs, results_method_1[i], max_local_link_load) for i in range(len(results_method_1))]
+    Phi_NEXU_IT = gl.network_total_throughput(M_EPs, Lcore_NEXU_IT, max_access_link_load)
+    results_method_1 = [gl.network_total_throughput(M_EPs, results_method_1[i], max_access_link_load) for i in range(len(results_method_1))]
 
-    return [max_remote_link_load, max_local_link_load, ECMP_Phi, Lremote_NEXU_IT, Phi_NEXU_IT, 
+    return [max_core_link_load, max_access_link_load, ECMP_Phi, Lcore_NEXU_IT, Phi_NEXU_IT, 
             times_method_1, [x/1E6 for x in peakRAMs_method_1], results_method_1,
             time_method_2, method_2_attempts, peakRAM_method_2/1E6]
 

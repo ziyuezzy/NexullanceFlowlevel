@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import networkx as nx
+from globals import access_link_flows_from_M_EPs, convert_M_EPs_to_M_R
 import numpy as np
 
 Graph = nx.graph.Graph
@@ -14,8 +15,10 @@ gp_options = {
 }
 
 class Nexullance_MP:
-    def __init__(self, _nx_graph: Graph, path_dict: dict, _M_R: np.ndarray, _Cap_remote: float, _solver:int=0, _verbose:bool=False):
-        # assume uniform C^{remote}
+    def __init__(self, _nx_graph: Graph, path_dict: dict, _Cap_core: float, _Cap_access: float,  
+                 num_routers:int = 0, _M_EPs:np.ndarray = np.ndarray([]),  _M_R: np.ndarray = np.ndarray([]), 
+                _solver:int=0, _verbose:bool=False):
+        # assume uniform C^{core}
         #LP solver options:
         '''    
         0: Automatic (solver chooses the method)
@@ -25,19 +28,28 @@ class Nexullance_MP:
         4: Barrier
         5: Concurrent (uses multiple methods)
         '''    
+
+        # the input either has valid _M_R, or a valid combination of _M_EPs and num_routers
+        if _M_R.size == 0:
+            self.M_R = _M_R
+            self.max_access_link_load = -1
+        else:
+            assert((num_routers > 0) and (_M_EPs.shape[0] > 0))
+            self.M_R = convert_M_EPs_to_M_R(_M_EPs, num_routers, len(_M_EPs[0])//num_routers)
+            self.max_access_link_load = max(access_link_flows_from_M_EPs(_M_EPs))/_Cap_access
+
         self.nx_graph: Graph = _nx_graph 
         # although we use un-directed graph here, each link still has two loads on two directions as in line 57,59
-        self.M_R: np.ndarray = _M_R
         self.solver: int = _solver
         self.verbose: bool = _verbose
-        self.Cap_remote: float = _Cap_remote
+        self.Cap_core: float = _Cap_core
         self.path_dict: dict = path_dict
 
 
     def init_model(self):
         num_routers=(1+pow(1+4*len(self.path_dict), 0.5))/2
         assert(num_routers==self.nx_graph.number_of_nodes() and 'length of path_dict should be N*(N-1), N is the number of routers')
-        assert(len(self.M_R)==len(self.M_R[0])==num_routers and \
+        assert(self.M_R.shape[0] == self.M_R.shape[1] == num_routers and \
                 'traffic matrix shape is wrong, note that this should be a M_R traffic matrix!')
         self.edge_list = list(self.nx_graph.edges())
         
@@ -79,7 +91,7 @@ class Nexullance_MP:
                     normalization_constr[(s, d)]+=self.path_prob[unique_path_id]
                 for i in range(len(path) - 1):
                     vertex1, vertex2 = path[i], path[i + 1]
-                    link_load_constr[(vertex1, vertex2)]+=self.path_prob[unique_path_id]*self.M_R[s][d]/self.Cap_remote
+                    link_load_constr[(vertex1, vertex2)]+=self.path_prob[unique_path_id]*self.M_R[s][d]/self.Cap_core
                 unique_path_id+=1
 
         for (u, v), linexp in link_load_constr.items():
@@ -87,6 +99,10 @@ class Nexullance_MP:
             self.model.addConstr(self.Max_load>=link_load_var[(u, v)])
         for linexp in normalization_constr.values():
             self.model.addConstr(linexp==1.0)
+            
+        # if max_access_link_load is given, set another constraint to limit the max link load
+        if self.max_access_link_load > 0:
+            self.model.addConstr(self.Max_load>=self.max_access_link_load)
 
         # print(f'number of variables = {len(self.path_prob)+len(link_load_var)}, number of constraints = {len(link_load_constr)+len(normalization_constr)}')
         # Set objective
@@ -117,6 +133,7 @@ class Nexullance_MP:
             # return traffic_shared, result_link_loads, Max_load_result
         
         else:
+            print("LP failed, possible infeasibility or unboundedness")
             self.model.setParam(GRB.Param.OutputFlag, 1)
             self.model.printStats()
-            raise Exception("LP failed")
+            return None, None

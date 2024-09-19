@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 MAX_KERNELS = 1 # define maximum threads to run
 import numpy as np
 import random
-from globals import convert_M_EPs_to_M_R, local_link_flows_from_M_EPs
+from globals import convert_M_EPs_to_M_R, access_link_flows_from_M_EPs, ECMP
 
 
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods
@@ -19,7 +19,7 @@ class HPC_topo():
         from .Slimfly import Slimflytopo
         from .Equality import Equalitytopo
         from .RRG import RRGtopo
-        from .Polarfly import PFtopo
+        from .Polarfly import Polarflytopo
 
     @classmethod
     def get_child_classes(cls):
@@ -28,6 +28,7 @@ class HPC_topo():
     
     @classmethod
     def initialize_child_instance(cls, child_class_name, *args, **kwargs):
+        cls.import_child_classes()
         child_classes = cls.__subclasses__()
         for sub in child_classes:
             if sub.__name__ == child_class_name:
@@ -130,6 +131,63 @@ class HPC_topo():
             paths_dict[(v1, v2)] = nx_paths_dict[v1][v2]
 
         return paths_dict, "ASP"
+
+    def pre_calculate_ECMP_ASP(self):
+        if hasattr(self, 'ECMP_ASP'):
+            return
+        vertices = self.nx_graph.nodes()
+        vertex_pairs = [(v1, v2) for v1 in vertices for v2 in vertices if v1 != v2]
+        nx_paths_dict = dict(nx.all_pairs_all_shortest_paths(self.nx_graph))
+        paths_dict = {}
+        for (v1, v2) in vertex_pairs:
+            paths_dict[(v1, v2)] = nx_paths_dict[v1][v2]
+        # self.ASP = paths_dict
+        self.ECMP_ASP = ECMP(paths_dict)
+
+    def pre_calculate_APST_n(self, max_length:int):
+        if hasattr(self, f"APST_{max_length}"):
+            return
+        assert(max_length >= self.calculate_diameter())
+        paths_dict={}
+        vertex_pairs = [(v1, v2) for v1 in self.nx_graph.nodes() for v2 in self.nx_graph.nodes() if v1 != v2]
+        for (v1, v2) in vertex_pairs:
+            all_paths = []
+            # Depth-first search to find all paths from v1 to v2
+            def dfs_paths(node, path):
+                if node == v2:
+                    all_paths.append(path)
+                elif len(path) < max_length+1:
+                    for neighbor in self.nx_graph.neighbors(node):
+                        if neighbor not in path:
+                            dfs_paths(neighbor, path + [neighbor])
+            dfs_paths(v1, [v1])
+            if not all_paths:
+                raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
+            paths_dict[(v1, v2)]=all_paths
+        self.__setattr__(f"APST_{max_length}", paths_dict)
+
+    # def pre_calculate_ECMP_APST_n(self, max_length:int):
+    #     if hasattr(self, f"ECMP_APST_{max_length}"):
+    #         return
+    #     assert(max_length >= self.calculate_diameter())
+    #     paths_dict={}
+    #     vertex_pairs = [(v1, v2) for v1 in self.nx_graph.nodes() for v2 in self.nx_graph.nodes() if v1 != v2]
+    #     for (v1, v2) in vertex_pairs:
+    #         all_paths = []
+    #         # Depth-first search to find all paths from v1 to v2
+    #         def dfs_paths(node, path):
+    #             if node == v2:
+    #                 all_paths.append(path)
+    #             elif len(path) < max_length+1:
+    #                 for neighbor in self.nx_graph.neighbors(node):
+    #                     if neighbor not in path:
+    #                         dfs_paths(neighbor, path + [neighbor])
+    #         dfs_paths(v1, [v1])
+    #         if not all_paths:
+    #             raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
+    #         paths_dict[(v1, v2)]=all_paths
+    #     self.__setattr__(f"ECMP_APST_{max_length}", ECMP(paths_dict))
+
     
     def calculate_all_shortest_paths_old(self): 
         vertices = self.nx_graph.nodes()
@@ -198,11 +256,11 @@ class HPC_topo():
         
     def distribute_M_EPs_on_weighted_paths(self, weighted_path_dict, EPR, M_EPs):
         M_R = convert_M_EPs_to_M_R(M_EPs, self.nx_graph.number_of_nodes(), EPR)
-        remote_link_flows = self.distribute_M_R_on_weighted_paths(weighted_path_dict, M_R)
-        remote_link_flows = [ v for v in remote_link_flows.values()]
+        core_link_flows = self.distribute_M_R_on_weighted_paths(weighted_path_dict, M_R)
+        core_link_flows = [ v for v in core_link_flows.values()]
 
-        local_link_flows: list = local_link_flows_from_M_EPs(M_EPs)
-        return remote_link_flows, local_link_flows
+        access_link_flows: list = access_link_flows_from_M_EPs(M_EPs)
+        return core_link_flows, access_link_flows
         
 
     # def distribute_arbitrary_flow_on_weighted_paths_with_EPs_return_dict(self, path_dict, p, traffic_matrix):
@@ -211,15 +269,15 @@ class HPC_topo():
 
     #     #p is the subscription of routers, meaning the number of EPs attached to one router
     #     link_flows = {}
-    #     local_link_flows = {}
+    #     access_link_flows = {}
     #     # initialization
     #     for u, v in list(self.nx_graph.edges()):
     #         link_flows[(u, v)]=0
     #         link_flows[(v, u)]=0
     #     for u in list(self.nx_graph.nodes()):
     #         for EP in range(p):
-    #             local_link_flows[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
-    #             local_link_flows[(-EP-1, u)]=0 # from EP to router
+    #             access_link_flows[(u, -EP-1)]=0 # from router to EP #Note that the '-EP-1' is just for distinguish the EP ids from router ids
+    #             access_link_flows[(-EP-1, u)]=0 # from EP to router
     #     # start calculation
     #     for u in list(self.nx_graph.nodes()):
     #         for src_EP in range(p):
@@ -230,8 +288,8 @@ class HPC_topo():
     #                     #calculates the absolute id of src and dest EPs
     #                     src_EP_abs=p*u+src_EP
     #                     dest_EP_abs=p*v+dest_EP
-    #                     local_link_flows[(-src_EP-1, u)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
-    #                     local_link_flows[(v, -dest_EP-1)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
+    #                     access_link_flows[(-src_EP-1, u)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
+    #                     access_link_flows[(v, -dest_EP-1)]+=traffic_matrix[src_EP_abs][dest_EP_abs]
     #                     if u!=v:
     #                         paths=path_dict[(u, v)]
     #                         check_sum=0
@@ -248,10 +306,10 @@ class HPC_topo():
     #                                     link_flows[(vertex1, vertex2)] += weight*traffic_matrix[src_EP_abs][dest_EP_abs]
     #                                 check_sum += weight
 
-    #     local_link_flows = [ v for v in local_link_flows.values()]
-    #     assert(min(local_link_flows)==max(local_link_flows))
+    #     access_link_flows = [ v for v in access_link_flows.values()]
+    #     assert(min(access_link_flows)==max(access_link_flows))
 
-    #     return link_flows, min(local_link_flows)
+    #     return link_flows, min(access_link_flows)
 
 
     def set_random_link_failures(self, failure_ratio, seed=0):

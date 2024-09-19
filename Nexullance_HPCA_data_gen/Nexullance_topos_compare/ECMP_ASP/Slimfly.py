@@ -14,8 +14,8 @@ import numpy as np
 import csv
 
 
-Cap_remote = 10 #GBps
-Cap_local = 10 #GBps
+Cap_core = 10 #GBps
+Cap_access = 10 #GBps
 
 def main():
     # initialize output data file
@@ -35,92 +35,92 @@ def main():
 
             traffic_pattern = "uniform"
             M_EPs = gl.generate_uniform_traffic_pattern(V, EPR)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
             # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_access_link_load/max_core_link_load])
             csvfile.flush()
 
             traffic_pattern = "nearst-neighbour"
             M_EPs = gl.generate_diagonal_traffic_pattern(V, EPR, 1)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
             # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_access_link_load/max_core_link_load])
             csvfile.flush()
 
             traffic_pattern = "shift_1"
             M_EPs = gl.generate_shift_traffic_pattern(V, EPR, 1)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
             # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_access_link_load/max_core_link_load])
             csvfile.flush()
 
             traffic_pattern = "shift_half"
-            M_EPs = gl.generate_half_shift_traffic_pattern(V, EPR)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
+            M_EPs = gl.generate_shift_half_traffic_pattern(V, EPR)
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
             # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_access_link_load/max_core_link_load])
             csvfile.flush()
 
             traffic_pattern = "router-cluster"
             M_EPs = gl.generate_uniform_cluster_pattern(V, EPR, 4) # four clusters
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
             # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_access_link_load/max_core_link_load])
             csvfile.flush()
 
             traffic_pattern = "random-permute"
             M_EPs = gl.generate_random_permutation_pattern(V, EPR, 0)
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
             # adapt the traffic scaling factor to 10x saturation
-            traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+            traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
             M_EPs = traffic_scaling * M_EPs
-            remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-            max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-            max_local_link_load = np.max(local_link_flows)/Cap_local
-            Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
-            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_local_link_load/max_remote_link_load])
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
+            csvwriter.writerow([V, D, EPR, traffic_pattern, Phi, Phi/(V*EPR), max_access_link_load/max_core_link_load])
             csvfile.flush()
 
 

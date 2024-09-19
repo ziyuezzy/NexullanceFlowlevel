@@ -50,8 +50,8 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     
     EPR=(config[1]+1)//2
     _network = RRGtopo(config[0], config[1])
-    Cap_remote = 10 #GBps
-    Cap_local = 10 #GBps
+    Cap_core = 10 #GBps
+    Cap_access = 10 #GBps
     M_EPs = None
     if traffic_pattern == "uniform":
         M_EPs = gl.generate_uniform_traffic_pattern(config[0], EPR)
@@ -67,19 +67,19 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     ASP, _ = _network.calculate_all_shortest_paths()
     arcs = _network.generate_graph_arcs()
     ECMP = gl.ECMP(ASP)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
     # adapt the traffic scaling factor to 10x saturation
-    traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+    traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
     M_EPs = traffic_scaling * M_EPs
     M_R = gl.convert_M_EPs_to_M_R(M_EPs, config[0], EPR)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
-    # print("Max remote link load: ", max_remote_link_load)
-    # print("Max local link load: ", max_local_link_load)
-    ECMP_Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
+    # print("Max core link load: ", max_core_link_load)
+    # print("Max access link load: ", max_access_link_load)
+    ECMP_Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
 
     ave_peak_RAM = 0
     ave_time = 0
@@ -97,9 +97,9 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     ave_peak_RAM /= reptition
     ave_time /= reptition
 
-    Lremote_NEXU_IT=nexu_it.get_max_link_load()
+    Lcore_NEXU_IT=nexu_it.get_max_link_load()
     num_step2_attempts = nexu_it.get_num_attempts_step_2()
-    Phi_NEXU_IT = gl.network_total_throughput(M_EPs, Lremote_NEXU_IT, max_local_link_load)
+    Phi_NEXU_IT = gl.network_total_throughput(M_EPs, Lcore_NEXU_IT, max_access_link_load)
 
 
     tracemalloc.stop()

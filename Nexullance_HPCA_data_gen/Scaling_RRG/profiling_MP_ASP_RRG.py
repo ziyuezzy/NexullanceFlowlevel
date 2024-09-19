@@ -24,7 +24,7 @@ def main():
 
     with open(filename, 'a', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lremote_MAX_ECMP_ASP', 'Llocal_MAX_ECMP_ASP', 'Phi_ECMP_ASP[GBps]', 'Lremote_NEXU_MP_ASP', 'Phi_NEXU[GBps]', 'init_time[s]', 'solving_time[s]', 'peak_RAM[MB]'])
+        csvwriter.writerow(['V', 'D', 'traffic_pattern', 'Lcore_MAX_ECMP_ASP', 'Laccess_MAX_ECMP_ASP', 'Phi_ECMP_ASP[GBps]', 'Lcore_NEXU_MP_ASP', 'Phi_NEXU[GBps]', 'init_time[s]', 'solving_time[s]', 'peak_RAM[MB]'])
         
 
         # configs = [(36, 7), (49, 8), (64, 9), (81, 10) , (100, 11)]
@@ -63,8 +63,8 @@ def main():
 def profile(config: tuple, traffic_pattern: str, _shift: int):
     EPR=(config[1]+1)//2
     _network = RRGtopo(config[0], config[1])
-    Cap_remote = 10 #GBps
-    Cap_local = 10 #GBps
+    Cap_core = 10 #GBps
+    Cap_access = 10 #GBps
     M_EPs = None
     if traffic_pattern == "uniform":
         M_EPs = gl.generate_uniform_traffic_pattern(config[0], EPR)
@@ -79,35 +79,35 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     # apply simple ECMP_ASP:
     ASP, _ = _network.calculate_all_shortest_paths()
     ECMP_ASP = gl.ECMP(ASP)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
     # adapt the traffic scaling factor to 10x saturation
-    traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
+    traffic_scaling = 10.0/max(max_access_link_load, max_core_link_load)
     M_EPs = traffic_scaling * M_EPs
     M_R = gl.convert_M_EPs_to_M_R(M_EPs, config[0], EPR)
-    remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
-    max_remote_link_load = np.max(remote_link_flows)/Cap_remote
-    max_local_link_load = np.max(local_link_flows)/Cap_local
-    # print("Max remote link load: ", max_remote_link_load)
-    # print("Max local link load: ", max_local_link_load)
-    ECMP_ASP_Phi=gl.network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load)
+    core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
+    max_core_link_load = np.max(core_link_flows)/Cap_core
+    max_access_link_load = np.max(access_link_flows)/Cap_access
+    # print("Max core link load: ", max_core_link_load)
+    # print("Max access link load: ", max_access_link_load)
+    ECMP_ASP_Phi=gl.network_total_throughput(M_EPs, max_core_link_load, max_access_link_load)
 
     tracemalloc.start()
     start_time = time.time()
-    nexu = Nexullance_MP(_network.nx_graph, ASP, M_R, Cap_remote, 0, False)
+    nexu = Nexullance_MP(_network.nx_graph, ASP, M_R, Cap_core, 0, False)
     nexu.init_model()
     middle_time = time.time()
-    Lremote_NEXU_MP_ASP, _ = nexu.solve()
-    # Lremote_NEXU_MP_ASP, weighted_path_dict = nexu.solve()
+    Lcore_NEXU_MP_ASP, _ = nexu.solve()
+    # Lcore_NEXU_MP_ASP, weighted_path_dict = nexu.solve()
     end_time = time.time()
     peak_RAM = tracemalloc.get_traced_memory()[1]
-    Phi_NEXU_MP_ASP = gl.network_total_throughput(M_EPs, Lremote_NEXU_MP_ASP, max_local_link_load)
+    Phi_NEXU_MP_ASP = gl.network_total_throughput(M_EPs, Lcore_NEXU_MP_ASP, max_access_link_load)
     # pickle.dump(weighted_path_dict, open(f"./picked_path_dicts/Nexullance_MP_ASP_RRG_{config[0]}_{config[1]}_{traffic_pattern}_{_shift}.pkl", "wb"))
 
     # current and peak memory usages are: {tracemalloc.get_traced_memory()} B")
 
-    return [max_remote_link_load, max_local_link_load, ECMP_ASP_Phi, Lremote_NEXU_MP_ASP, Phi_NEXU_MP_ASP, middle_time - start_time, end_time - middle_time, peak_RAM]
+    return [max_core_link_load, max_access_link_load, ECMP_ASP_Phi, Lcore_NEXU_MP_ASP, Phi_NEXU_MP_ASP, middle_time - start_time, end_time - middle_time, peak_RAM]
 
 if __name__ == '__main__':
     main()

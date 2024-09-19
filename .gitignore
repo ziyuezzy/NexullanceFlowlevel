@@ -13,7 +13,8 @@ nexullance/bin
 # *.csv
 *.graphml
 *.austin
-
+bin/
+./nexullance/IT_boost-bak/
 
 # white listing
 !nexullance/*.ipynb

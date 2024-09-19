@@ -348,7 +348,7 @@ def generate_shift_traffic_pattern(num_routers, EPR, shift):
 
     return traffic_matrix
 
-def generate_half_shift_traffic_pattern(num_routers, EPR):
+def generate_shift_half_traffic_pattern(num_routers, EPR):
     total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
@@ -469,21 +469,21 @@ def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, 
 
     return mean(list(success_rate.values()))
                     
-def local_link_flows_from_M_EPs(M_EPs):
-    local_link_flows=[]
+def access_link_flows_from_M_EPs(M_EPs):
+    access_link_flows=[]
     M_EPs=np.array(M_EPs)
     for row in M_EPs:
-        local_link_flows.append(np.sum(row))
+        access_link_flows.append(np.sum(row))
     for row in M_EPs.swapaxes(0,1):
-        local_link_flows.append(np.sum(row))
-    return local_link_flows
+        access_link_flows.append(np.sum(row))
+    return access_link_flows
 
-def network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load):
+def network_total_throughput(M_EPs, max_core_link_load, max_access_link_load):
     array_sum = np.sum(M_EPs)
-    if max_remote_link_load<1 and max_local_link_load<1:
+    if max_core_link_load<1 and max_access_link_load<1:
         return array_sum
     else:
-        return array_sum / max([max_remote_link_load, max_local_link_load])
+        return array_sum / max([max_core_link_load, max_access_link_load])
 
 
 
@@ -519,3 +519,40 @@ def network_total_throughput(M_EPs, max_remote_link_load, max_local_link_load):
 #         print("Number of orbits:", numorbits)
 
 #     return generators
+
+def cal_MD_obj_func(list_of_phis: list, weight: list):
+    assert len(list_of_phis) == len(weight)
+    # a harmonic mean of network data throughput
+    return 1/(sum([weight[i]/list_of_phis[i] for i in range(len(list_of_phis))]))
+
+
+def gen_M_EPs_s(topo_name: str, V:int, D:int, EPR:int, M_names:list[str], scaling_factor:float=0.0, Cap_core:int=10, Cap_access:int=10):
+    
+    import sys
+    sys.path.append("/users/ziyzhang/topology-research")
+    from topologies import HPC_topo
+    
+    _network = HPC_topo.HPC_topo.initialize_child_instance(topo_name+"topo", V, D)
+    result=[]
+    _network.pre_calculate_ECMP_ASP()
+
+    for M_name in M_names:
+        temp_M = None
+        if M_name == "uniform":
+            temp_M=generate_uniform_traffic_pattern(V, EPR)
+        elif M_name=="half_shift":
+            temp_M=generate_shift_half_traffic_pattern(V, EPR)
+        elif M_name.startswith("shift"):# if the name contains "shift"
+            temp_M=generate_shift_traffic_pattern(V, EPR, int(M_name.split("_")[1]))
+        else: # other names are not supported yet
+            print(f"Error: {M_name} not implemented yet")
+        
+        if scaling_factor!= 0.0:
+            # try to scale the traffic demand matrix
+            core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(_network.ECMP_ASP, EPR, temp_M)
+            max_core_link_load = np.max(core_link_flows)/Cap_core
+            max_access_link_load = np.max(access_link_flows)/Cap_access
+            traffic_scaling = scaling_factor/max(max_access_link_load, max_core_link_load)
+            temp_M = traffic_scaling * temp_M
+        result.append(temp_M)
+    return result

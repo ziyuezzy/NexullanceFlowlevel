@@ -245,7 +245,7 @@ class BrownGenerator():
 
 
 
-class PFtopo(HPC_topo.HPC_topo):
+class Polarflytopo(HPC_topo.HPC_topo):
     def __init__(self, *args, **kwargs):
         """
         q: prime power
