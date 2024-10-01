@@ -34,7 +34,7 @@ def main():
             ECMP_ASP = gl.ECMP(ASP)
 
             traffic_pattern = "uniform"
-            M_EPs = gl.generate_uniform_traffic_pattern(V, EPR)
+            M_EPs = gl.generate_uniform_traffic_demand_matrix(V, EPR)
             core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_core_link_load = np.max(core_link_flows)/Cap_core
             max_access_link_load = np.max(access_link_flows)/Cap_access
@@ -49,7 +49,7 @@ def main():
             csvfile.flush()
 
             traffic_pattern = "nearst-neighbour"
-            M_EPs = gl.generate_diagonal_traffic_pattern(V, EPR, 1)
+            M_EPs = gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
             core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_core_link_load = np.max(core_link_flows)/Cap_core
             max_access_link_load = np.max(access_link_flows)/Cap_access
@@ -64,7 +64,7 @@ def main():
             csvfile.flush()
 
             traffic_pattern = "shift_1"
-            M_EPs = gl.generate_shift_traffic_pattern(V, EPR, 1)
+            M_EPs = gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
             core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_core_link_load = np.max(core_link_flows)/Cap_core
             max_access_link_load = np.max(access_link_flows)/Cap_access
@@ -79,7 +79,7 @@ def main():
             csvfile.flush()
 
             traffic_pattern = "shift_half"
-            M_EPs = gl.generate_shift_half_traffic_pattern(V, EPR)
+            M_EPs = gl.generate_shift_half_traffic_demand_matrix(V, EPR)
             core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_core_link_load = np.max(core_link_flows)/Cap_core
             max_access_link_load = np.max(access_link_flows)/Cap_access
@@ -94,7 +94,7 @@ def main():
             csvfile.flush()
 
             traffic_pattern = "router-cluster"
-            M_EPs = gl.generate_uniform_cluster_pattern(V, EPR, 4) # four clusters
+            M_EPs = gl.generate_uniform_cluster_demand_matrix(V, EPR, 4) # four clusters
             core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_core_link_load = np.max(core_link_flows)/Cap_core
             max_access_link_load = np.max(access_link_flows)/Cap_access
@@ -109,7 +109,7 @@ def main():
             csvfile.flush()
 
             traffic_pattern = "random-permute"
-            M_EPs = gl.generate_random_permutation_pattern(V, EPR, 0)
+            M_EPs = gl.generate_random_permutation_demand_matrix(V, EPR, 0)
             core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
             max_core_link_load = np.max(core_link_flows)/Cap_core
             max_access_link_load = np.max(access_link_flows)/Cap_access

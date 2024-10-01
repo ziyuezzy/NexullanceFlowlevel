@@ -26,7 +26,7 @@ def main():
     # # shifts
     for _shift in range(1, V*EPR):
     # for _shift in range(1, 5):
-        M_EPs = gl.generate_shift_traffic_pattern(V, EPR, _shift)
+        M_EPs = gl.generate_shift_traffic_demand_matrix(V, EPR, _shift)
         # try to scale the traffic scaling factor to 10x saturation under ECMP_ASP
         core_link_flows, access_link_flows = _network.distribute_M_EPs_on_weighted_paths(_network.ECMP_ASP, EPR, M_EPs)
         max_core_link_load = np.max(core_link_flows)/Cap_core

@@ -68,11 +68,11 @@ def profile(config: tuple, traffic_pattern: str, _shift: int):
     Cap_access = 10 #GBps
     M_EPs = None
     if traffic_pattern == "uniform":
-        M_EPs = gl.generate_uniform_traffic_pattern(config[0], EPR)
+        M_EPs = gl.generate_uniform_traffic_demand_matrix(config[0], EPR)
     elif traffic_pattern == "shift":
-        M_EPs = gl.generate_shift_traffic_pattern(config[0], EPR, _shift)
+        M_EPs = gl.generate_shift_traffic_demand_matrix(config[0], EPR, _shift)
     elif traffic_pattern == "diagonal":
-        M_EPs = gl.generate_diagonal_traffic_pattern(config[0], EPR, _shift)
+        M_EPs = gl.generate_diagonal_traffic_demand_matrix(config[0], EPR, _shift)
     else:
         raise ValueError("Invalidtraffic pattern name")
 

@@ -125,6 +125,11 @@ class MD_Nexullance_MP:
 
     def get_Objective_func(self):
         if self.model.status == GRB.OPTIMAL:
+            if self.Objective_func.X == 0:
+                print("Warning: objective function is 0??")
+                return 0.0 # to avoid numerical error
+            
+            # assert(self.Objective_func.X > 0)
             return 1/self.Objective_func.X # a harmonic mean of network data throughput
         else:
             raise Exception("did not solve LP, or LP failed")

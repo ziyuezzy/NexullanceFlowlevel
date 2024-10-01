@@ -333,14 +333,14 @@ def cal_weighted_ave_path_length(weighted_path_dict):
             ave_path_length += weight*len(path)
     return ave_path_length/len(weighted_path_dict)
 
-def generate_uniform_traffic_pattern(num_routers, EPR):
+def generate_uniform_traffic_demand_matrix(num_routers, EPR):
     total_num_EP=EPR*num_routers
     traffic_matrix=np.ones((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
         traffic_matrix[i][i]=0
     return traffic_matrix
 
-def generate_shift_traffic_pattern(num_routers, EPR, shift):
+def generate_shift_traffic_demand_matrix(num_routers, EPR, shift):
     total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
@@ -348,7 +348,7 @@ def generate_shift_traffic_pattern(num_routers, EPR, shift):
 
     return traffic_matrix
 
-def generate_shift_half_traffic_pattern(num_routers, EPR):
+def generate_shift_half_traffic_demand_matrix(num_routers, EPR):
     total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
@@ -356,7 +356,7 @@ def generate_shift_half_traffic_pattern(num_routers, EPR):
 
     return traffic_matrix
 
-def generate_diagonal_traffic_pattern(num_routers, EPR, offset):
+def generate_diagonal_traffic_demand_matrix(num_routers, EPR, offset):
     total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
     for i in range(total_num_EP):
@@ -367,7 +367,7 @@ def generate_diagonal_traffic_pattern(num_routers, EPR, offset):
 
     return traffic_matrix
 
-def generate_uniform_cluster_pattern(num_routers, EPR, num_clusters):
+def generate_uniform_cluster_demand_matrix(num_routers, EPR, num_clusters):
     # All endpoints are clustered in a number of clusters, each cluster has a uniform traffic among EPs.
     assert(num_clusters>num_routers, "better to be more than 1 routers per cluster")
     total_num_EP=EPR*num_routers
@@ -382,7 +382,7 @@ def generate_uniform_cluster_pattern(num_routers, EPR, num_clusters):
                     traffic_matrix[ep1][ep2]=1
     return traffic_matrix
 
-def generate_random_permutation_pattern(num_routers, EPR, seed=0):
+def generate_random_permutation_demand_matrix(num_routers, EPR, seed=0):
     random.seed(seed)
     total_num_EP=EPR*num_routers
     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
@@ -393,7 +393,7 @@ def generate_random_permutation_pattern(num_routers, EPR, seed=0):
         traffic_matrix[i][random_dest]=1
     return traffic_matrix
 
-def generate_random_cluster_pattern(num_routers, EPR, num_clusters=None, seed=0):
+def generate_random_cluster_demand_matrix(num_routers, EPR, num_clusters=None, seed=0):
     if num_clusters==None:
         num_clusters=num_routers
     random.seed(seed)
@@ -411,8 +411,38 @@ def generate_random_cluster_pattern(num_routers, EPR, num_clusters=None, seed=0)
             EPs.remove(v)  
     return traffic_matrix
 
+def generate_random_gaussian_demand_matrix(num_routers, EPR, mean, std, seed=0):
+    random.seed(seed)
+    total_num_EP=EPR*num_routers
+    traffic_matrix=np.zeros((total_num_EP, total_num_EP))
+    for i in range(total_num_EP):
+        for j in range(total_num_EP):
+            if i == j:
+                traffic_matrix[i][j]=0
+            else:
+                traffic_matrix[i][j] = random.gauss(mean, std)
+    return traffic_matrix
 
-# def generate_all_reduce_traffic_pattern(num_routers, EPR, _center):
+
+def perturbate_gaussian(input_matrix: np.ndarray, perturbation_rate: float, print_output: bool=False, abs_perturbate:bool = False):
+    output_matrix = np.zeros_like(input_matrix)
+    num_nodes = input_matrix.shape[0]
+    max_entry = np.max(input_matrix)
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+            if abs_perturbate:
+                output_matrix[i][j] = input_matrix[i][j] + random.gauss(0, perturbation_rate*input_matrix[i][j])
+            else:
+                output_matrix[i][j] = input_matrix[i][j] + random.gauss(0, perturbation_rate*max_entry)
+            if output_matrix[i][j] < 0:
+                output_matrix[i][j] = 0    
+    if print_output:
+        print("Perturbed matrix:")
+        print(output_matrix)
+    return output_matrix
+
+
+# def generate_all_reduce_traffic_demand_matrix(num_routers, EPR, _center):
 #     # center as the center of all-reduce operation
 #     total_num_EP=EPR*num_routers
 #     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
@@ -421,7 +451,7 @@ def generate_random_cluster_pattern(num_routers, EPR, num_clusters=None, seed=0)
 #             traffic_matrix[i][_center]=1 # TODO: this is wrong, should be a tree structure
 #     return traffic_matrix
 
-# def generate_broadcast_traffic_pattern(num_routers, EPR, _center):
+# def generate_broadcast_traffic_demand_matrix(num_routers, EPR, _center):
 #     # center as the center of the broadcast operation
 #     total_num_EP=EPR*num_routers
 #     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
@@ -539,11 +569,11 @@ def gen_M_EPs_s(topo_name: str, V:int, D:int, EPR:int, M_names:list[str], scalin
     for M_name in M_names:
         temp_M = None
         if M_name == "uniform":
-            temp_M=generate_uniform_traffic_pattern(V, EPR)
+            temp_M=generate_uniform_traffic_demand_matrix(V, EPR)
         elif M_name=="half_shift":
-            temp_M=generate_shift_half_traffic_pattern(V, EPR)
+            temp_M=generate_shift_half_traffic_demand_matrix(V, EPR)
         elif M_name.startswith("shift"):# if the name contains "shift"
-            temp_M=generate_shift_traffic_pattern(V, EPR, int(M_name.split("_")[1]))
+            temp_M=generate_shift_traffic_demand_matrix(V, EPR, int(M_name.split("_")[1]))
         else: # other names are not supported yet
             print(f"Error: {M_name} not implemented yet")
         

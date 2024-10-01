@@ -274,6 +274,19 @@ class nexullance_exp_container:
         for m, maxL_NEXU in enumerate(maxL_NEXU_s):
             phis.append(gl.network_total_throughput(M_EPs_s[m], maxL_NEXU, maxL_NEXU)/(self.V*self.EPR))
         return md_nexu.get_Objective_func()/(self.V*self.EPR), phis
+    
+    def run_MD_nexullance_MP_return_RT(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False):
+        # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
+        assert(len(M_EPs_s) == len(M_EPs_weights))
+        self._network.pre_calculate_APST_n(max_path_length)
+        md_nexu = MD_Nexullance_MP.MD_Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
+                                            self.Cap_core, self.Cap_access, self.V, M_EPs_s, M_EPs_weights, _verbose=_debug)
+        md_nexu.init_model(self.EPR)
+        maxL_NEXU_s, RT = md_nexu.solve()
+        phis=[]
+        for m, maxL_NEXU in enumerate(maxL_NEXU_s):
+            phis.append(gl.network_total_throughput(M_EPs_s[m], maxL_NEXU, maxL_NEXU)/(self.V*self.EPR))
+        return phis, RT
         
     def run_and_profile_MD_nexullance_MP(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False, repetitions:int=10):
         # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])

@@ -32,8 +32,8 @@ def main():
                 
                 # define traffic patterns
                 Demand_matrices=dict()
-                Demand_matrices["uniform"]=gl.generate_uniform_traffic_pattern(V, EPR)
-                Demand_matrices["shift_half"]=gl.generate_shift_half_traffic_pattern(V, EPR)
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift_half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
 
 
                 for traffic_name, M_EPs in Demand_matrices.items():

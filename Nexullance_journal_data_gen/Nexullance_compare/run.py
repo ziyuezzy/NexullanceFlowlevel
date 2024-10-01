@@ -34,12 +34,12 @@ def main():
                 
                 # define traffic patterns
                 Demand_matrices=dict()
-                Demand_matrices["uniform"]=gl.generate_uniform_traffic_pattern(V, EPR)
-                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_pattern(V, EPR)
-                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_pattern(V, EPR, 1)
-                Demand_matrices["shift-1"]=gl.generate_shift_traffic_pattern(V, EPR, 1)
-                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_pattern(V, EPR, 4)
-                Demand_matrices["random-permute"]=gl.generate_shift_traffic_pattern(V, EPR, 0)
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
                 for traffic_name, M_EPs in Demand_matrices.items():
                     result = exp_container.run_and_profile_nexullance_IT(M_EPs, traffic_name, False, 3)
@@ -60,12 +60,12 @@ def main():
                 
                 # define traffic patterns
                 Demand_matrices=dict()
-                Demand_matrices["uniform"]=gl.generate_uniform_traffic_pattern(V, EPR)
-                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_pattern(V, EPR)
-                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_pattern(V, EPR, 1)
-                Demand_matrices["shift-1"]=gl.generate_shift_traffic_pattern(V, EPR, 1)
-                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_pattern(V, EPR, 4)
-                Demand_matrices["random-permute"]=gl.generate_shift_traffic_pattern(V, EPR, 0)
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
                 for traffic_name, M_EPs in Demand_matrices.items():
                     result = exp_container.run_and_profile_nexullance_MP(4, M_EPs, traffic_name, 3)
@@ -86,12 +86,12 @@ def main():
                 
                 # define traffic patterns
                 Demand_matrices=dict()
-                Demand_matrices["uniform"]=gl.generate_uniform_traffic_pattern(V, EPR)
-                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_pattern(V, EPR)
-                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_pattern(V, EPR, 1)
-                Demand_matrices["shift-1"]=gl.generate_shift_traffic_pattern(V, EPR, 1)
-                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_pattern(V, EPR, 4)
-                Demand_matrices["random-permute"]=gl.generate_shift_traffic_pattern(V, EPR, 0)
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
                 for traffic_name, M_EPs in Demand_matrices.items():
                     result = exp_container.run_and_profile_nexullance_OPT(M_EPs, traffic_name, 3)

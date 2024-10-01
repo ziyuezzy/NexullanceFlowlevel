@@ -13,11 +13,11 @@ def gen_M_EPs_s(topo_name: str, V:int, D:int, EPR:int, M_names:list[str], scalin
     for M_name in M_names:
         temp_M = None
         if M_name == "uniform":
-            temp_M=gl.generate_uniform_traffic_pattern(V, EPR)
+            temp_M=gl.generate_uniform_traffic_demand_matrix(V, EPR)
         elif M_name=="half_shift":
-            temp_M=gl.generate_shift_half_traffic_pattern(V, EPR)
+            temp_M=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
         elif M_name.startswith("shift"):# if the name contains "shift"
-            temp_M=gl.generate_shift_traffic_pattern(V, EPR, int(M_name.split("_")[1]))
+            temp_M=gl.generate_shift_traffic_demand_matrix(V, EPR, int(M_name.split("_")[1]))
         else: # other names are not supported yet
             print(f"Error: {M_name} not implemented yet")
         
