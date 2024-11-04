@@ -43,7 +43,7 @@ class DDFtopo(HPC_topo):
             for router_in_group in range(self.routers_per_group):
                 router_id = group * self.routers_per_group + router_in_group
                 G.add_node(router_id, group=group, adjacency=dict()) 
-                # adjacent_groups contains (remote group id -> remote router id)
+                # adjacent_groups contains (core group id -> core router id)
 
         # Add intragroup links
         for group in range(self.num_groups):

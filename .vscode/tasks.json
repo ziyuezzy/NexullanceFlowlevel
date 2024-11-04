@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "austin",
+            "file": "/users/ziyzhang/topology-research/nexullance/optimizing_IT/austin/profile_IT.py",
+            "label": "Profile IT",
+            "problemMatcher": []
+        },
+        {
+            "type": "austin",
+            "file": "/users/ziyzhang/topology-research/test.py",
+            "label": "Profile dummy",
+            "problemMatcher": []
+        },
+
+    ]
+}

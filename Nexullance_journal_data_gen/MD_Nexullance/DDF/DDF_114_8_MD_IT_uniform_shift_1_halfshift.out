@@ -1,0 +1,59 @@
+/users/ziyzhang/miniconda3/envs/gt/lib/python3.12/site-packages/numpy/core/getlimits.py:549: UserWarning: The value of the smallest subnormal for <class 'numpy.float64'> type is zero.
+  setattr(self, word, getattr(machar, word).flat[0])
+/users/ziyzhang/miniconda3/envs/gt/lib/python3.12/site-packages/numpy/core/getlimits.py:89: UserWarning: The value of the smallest subnormal for <class 'numpy.float64'> type is zero.
+  return self._float_to_str(self.smallest_subnormal)
+/users/ziyzhang/miniconda3/envs/gt/lib/python3.12/site-packages/numpy/core/getlimits.py:549: UserWarning: The value of the smallest subnormal for <class 'numpy.float32'> type is zero.
+  setattr(self, word, getattr(machar, word).flat[0])
+/users/ziyzhang/miniconda3/envs/gt/lib/python3.12/site-packages/numpy/core/getlimits.py:89: UserWarning: The value of the smallest subnormal for <class 'numpy.float32'> type is zero.
+  return self._float_to_str(self.smallest_subnormal)
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2411299
+Academic license 2411299 - for non-commercial use only - registered to zi___@ugent.be
+Set parameter Threads to value 1
+Optimal solution found
+Objective function := the harmonic mean of network data throughout under demand matrices
+ECMP_ASP objective function: 1.8892907893037074
+Nexullance_MP_APST4 objective function: 6.113119912185878
+Nexullance_IT objective function: 5.305825770600721
+MD_Nexullance_MP_APST4 objective function: 6.105836655841536
+MD_Nexullance_IT objective function: 5.27720542252175
+Nexullance_MP_APST4_uniform objective function: 1.9624943711717149
+Nexullance_MP_APST4_shift_1 objective function: 1.024851715594264
+Nexullance_MP_APST4_halfshift objective function: 1.5047264210357605
