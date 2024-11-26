@@ -50,3 +50,5 @@ The time complexity of "all_pairs_all_shortest_paths" is simply V times the time
 
 https://networkx.org/documentation/stable/_modules/networkx/algorithms/shortest_paths/generic.html#all_shortest_paths
 
+Bayesian Optimization: 
+https://github.com/bayesian-optimization/BayesianOptimization

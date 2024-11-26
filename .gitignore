@@ -15,6 +15,8 @@ nexullance/bin
 *.austin
 bin/
 ./nexullance/IT_boost-bak/
+test_sst/
+.vscode/
 
 # white listing
 !nexullance/*.ipynb

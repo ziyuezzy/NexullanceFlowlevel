@@ -1,7 +1,7 @@
 import os
 import sys
-sys.path.append("/users/ziyzhang/topology-research/")
-import globals as gl
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..')))
+import global_helpers as gl
 import numpy as np
 import csv
 from nexullance.ultility import nexullance_exp_container
@@ -42,7 +42,7 @@ def main():
                 Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
                 for traffic_name, M_EPs in Demand_matrices.items():
-                    result = exp_container.run_and_profile_nexullance_IT(M_EPs, traffic_name, False, 3)
+                    result = exp_container.run_and_profile_nexullance_IT(M_EPs, traffic_name, 3)
                     csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
                                         result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
                     csvfile.flush()

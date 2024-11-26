@@ -1,18 +1,17 @@
 import os
 import sys
-sys.path.append("/users/ziyzhang/topology-research/")
-sys.path.append("/users/ziyzhang/topology-research/topologies/")
-sys.path.append("/users/ziyzhang/topology-research/nexullance/")
 
-# import the cpp library
-sys.path.append("/users/ziyzhang/topology-research/nexullance/IT_boost/build")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, ".."))
+sys.path.append(os.path.join(current_dir, "IT_boost/build/"))
+
 from Nexullance_IT_cpp import *
 
 from topologies import HPC_topo
 from nexullance import Nexullance_MP, Nexullance_OPT
 from nexullance.MD_Nexullance_MP import MD_Nexullance_MP
 
-import globals as gl
+import global_helpers as gl
 import numpy as np
 import csv
 from networkx import Graph
@@ -50,7 +49,9 @@ class nexullance_exp_container:
         self.Cap_core = Cap_core
         self.Cap_access = Cap_access
 
-        self._network = HPC_topo.HPC_topo.initialize_child_instance(topo_name+"topo", V, D)
+        if not topo_name.endswith("topo"):
+            topo_name = topo_name + "topo"
+        self._network = HPC_topo.HPC_topo.initialize_child_instance(topo_name, V, D)
         self._network.pre_calculate_ECMP_ASP()
 
 
@@ -76,7 +77,7 @@ class nexullance_exp_container:
             nexu.init_model()
             start_time = time.time()
             tracemalloc.start()
-            maxLcore_NEXU = nexu.solve()
+            max_load_Nexu = nexu.solve()
             end_time = time.time()
             peak_RAM = tracemalloc.get_traced_memory()[1]
             tracemalloc.stop()
@@ -85,8 +86,8 @@ class nexullance_exp_container:
             measured_time.append(end_time - start_time)
             measured_PeakRAM.append(peak_RAM)
         
-            if maxLcore_NEXU is None:
-                # if maxLcore_NEXU is None, check if the bottleneck links are the access links
+            if max_load_Nexu is None:
+                # if max_load_Nexu is None, check if the bottleneck links are the access links
                 if ECMP_ASP_max_core_link_load > ECMP_ASP_max_access_link_load:
                     # ok, we guessed right, continue
                     measured_phi.append(gl.network_total_throughput(scaled_M_EPs, ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)/(self.V*self.EPR))
@@ -94,7 +95,7 @@ class nexullance_exp_container:
                     # we guessed wrong, this need to be investigated, maybe the random starting point in gurobi is makeing the core link load lower than access link load.
                     Warning(f"no result is produced for traffic: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
             else:
-                measured_phi.append(gl.network_total_throughput(scaled_M_EPs, maxLcore_NEXU, ECMP_ASP_max_access_link_load)/(self.V*self.EPR))
+                measured_phi.append(gl.network_total_throughput(scaled_M_EPs, max_load_Nexu, ECMP_ASP_max_access_link_load)/(self.V*self.EPR))
 
        # measured_time=remove_outliers(measured_time)
        # measured_PeakRAM=remove_outliers(measured_PeakRAM)
@@ -103,39 +104,37 @@ class nexullance_exp_container:
                 "ave_time[s]": st.mean(measured_time), "std_time[s]": st.stdev(measured_time), 
                 "ave_PeakRAM[B]": st.mean(measured_PeakRAM), "std_PeakRAM[B]": st.stdev(measured_PeakRAM)}
         
-    def run_nexullance_OPT(self, M_EPs:np.ndarray, traffic_name:str):
-        assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
+    # def run_nexullance_OPT(self, M_EPs:np.ndarray, traffic_name:str):
+    #     assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
 
-        # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
-        core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
-        traffic_scaling = self.Demand_scaling_factor/max(np.max(core_link_flows)/self.Cap_core, np.max(access_link_flows)/self.Cap_access)
+    #     # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
+    #     core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
+    #     traffic_scaling = self.Demand_scaling_factor/max(np.max(core_link_flows)/self.Cap_core, np.max(access_link_flows)/self.Cap_access)
 
-        scaled_M_EPs = traffic_scaling * M_EPs
+    #     scaled_M_EPs = traffic_scaling * M_EPs
 
-        # re-calculate after scaling
-        core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, scaled_M_EPs)
-        ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
-        ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
+    #     # re-calculate after scaling
+    #     core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, scaled_M_EPs)
+    #     ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
+    #     ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
 
-        nexu = Nexullance_OPT.Nexullance_OPT(self._network.nx_graph, self.Cap_core, self.Cap_access, self.V, scaled_M_EPs)
-        nexu.init_model()
-        maxLcore_NEXU = nexu.solve()
+    #     nexu = Nexullance_OPT.Nexullance_OPT(self._network.nx_graph, self.Cap_core, self.Cap_access, self.V, scaled_M_EPs)
+    #     nexu.init_model()
+    #     max_load_Nexu = nexu.solve()
 
 
     
-        if maxLcore_NEXU is None:
-            # if maxLcore_NEXU is None, check if the bottleneck links are the access links
-            if ECMP_ASP_max_core_link_load > ECMP_ASP_max_access_link_load:
-                # ok, we guessed right, continue
-                return gl.network_total_throughput(scaled_M_EPs, ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)/(self.V*self.EPR)
-            else:
-                # we guessed wrong, this need to be investigated, maybe the random starting point in gurobi is makeing the core link load lower than access link load.
-                Warning(f"no result is produced for traffic: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
-        else:
-            print("result max core link load:", maxLcore_NEXU )
-            return gl.network_total_throughput(scaled_M_EPs, maxLcore_NEXU, ECMP_ASP_max_access_link_load)/(self.V*self.EPR)
-
-        
+    #     if max_load_Nexu is None:
+    #         # if max_load_Nexu is None, check if the bottleneck links are the access links
+    #         if ECMP_ASP_max_core_link_load > ECMP_ASP_max_access_link_load:
+    #             # ok, we guessed right, continue
+    #             return gl.network_total_throughput(scaled_M_EPs, ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)/(self.V*self.EPR)
+    #         else:
+    #             # we guessed wrong, this need to be investigated, maybe the random starting point in gurobi is makeing the core link load lower than access link load.
+    #             Warning(f"no result is produced for traffic: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
+    #     else:
+    #         print("result max core link load:", max_load_Nexu )
+    #         return gl.network_total_throughput(scaled_M_EPs, max_load_Nexu, ECMP_ASP_max_access_link_load)/(self.V*self.EPR)
 
     def run_and_profile_nexullance_MP(self, max_path_length: int, M_EPs:np.ndarray, traffic_name:str, repetitions:int=10):
         assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
@@ -162,7 +161,7 @@ class nexullance_exp_container:
             nexu.init_model()
             tracemalloc.start()
             start_time = time.time()
-            maxLcore_NEXU, _ = nexu.solve()
+            max_load_Nexu, _ = nexu.solve()
             end_time = time.time()
             peak_RAM = tracemalloc.get_traced_memory()[1]
             tracemalloc.stop()
@@ -171,8 +170,8 @@ class nexullance_exp_container:
             measured_time.append(end_time - start_time)
             measured_PeakRAM.append(peak_RAM)
         
-            if maxLcore_NEXU is None:
-                # if maxLcore_NEXU is None, check if the bottleneck links are the access links
+            if max_load_Nexu is None:
+                # if max_load_Nexu is None, check if the bottleneck links are the access links
                 if ECMP_ASP_max_core_link_load > ECMP_ASP_max_access_link_load:
                     # ok, we guessed right, continue
                     measured_phi.append(gl.network_total_throughput(scaled_M_EPs, ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)/(self.V*self.EPR))
@@ -180,7 +179,7 @@ class nexullance_exp_container:
                     # we guessed wrong, this need to be investigated, maybe the random starting point in gurobi is makeing the core link load lower than access link load.
                     Warning(f"no result is produced for traffic: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
             else:
-                measured_phi.append(gl.network_total_throughput(scaled_M_EPs, maxLcore_NEXU, ECMP_ASP_max_access_link_load)/(self.V*self.EPR))
+                measured_phi.append(gl.network_total_throughput(scaled_M_EPs, max_load_Nexu, ECMP_ASP_max_access_link_load)/(self.V*self.EPR))
 
        # measured_time=remove_outliers(measured_time)
        # measured_PeakRAM=remove_outliers(measured_PeakRAM)
@@ -189,7 +188,35 @@ class nexullance_exp_container:
                 "ave_time[s]": st.mean(measured_time), "std_time[s]": st.stdev(measured_time), 
                 "ave_PeakRAM[B]": st.mean(measured_PeakRAM), "std_PeakRAM[B]": st.stdev(measured_PeakRAM)}
         
+    def run_nexullance_MP_return_RT(self, max_path_length: int, M_EPs:np.ndarray, traffic_name:str):
+        
+        assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
 
+        self._network.pre_calculate_APST_n(max_path_length)
+
+        # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
+        core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
+        ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
+        ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
+        traffic_scaling = self.Demand_scaling_factor/max(ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
+
+        scaled_M_EPs = traffic_scaling * M_EPs
+
+        nexu = Nexullance_MP.Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
+                                           self.Cap_core, self.Cap_access, self.V, scaled_M_EPs)
+        nexu.init_model()
+        max_load_Nexu, result_RT = nexu.solve()
+        
+        if max_load_Nexu is None:
+            print("Nexullance_MP failed")
+            sys.exit(1)   
+        else:
+            Phi = gl.network_total_throughput(scaled_M_EPs, max_load_Nexu)
+            print(f"max link load from Nexullance_MP_APST_{max_path_length}=", max_load_Nexu)
+            print(f"resulting phi from Nexullance_MP_APST_{max_path_length}=", Phi/(self.V*self.EPR))
+
+            return gl.clean_up_weighted_paths(result_RT)
+        
     def run_and_profile_nexullance_IT(self, M_EPs:np.ndarray, traffic_name:str, repetitions:int=10):
         assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
 
@@ -205,7 +232,7 @@ class nexullance_exp_container:
         measured_PeakRAM=[]
         measured_phi=[]
         for i in range(repetitions+1):
-            nexu = Nexullance_IT_interface(self.V, arcs, debug=False)        
+            nexu = Nexullance_IT_interface(self.V, arcs, self.Cap_core, self.Cap_access, debug=False)        
             nexu.set_parameters(0.1, 7.0, 0.00001, 5, 1000000, self.V*3, False)
             tracemalloc.start()
             start_time = time.time()
@@ -226,7 +253,26 @@ class nexullance_exp_container:
                 "ave_time[s]": st.mean(measured_time), "std_time[s]": st.stdev(measured_time), 
                 "ave_PeakRAM[B]": st.mean(measured_PeakRAM), "std_PeakRAM[B]": st.stdev(measured_PeakRAM)}
         
+    def run_nexullance_IT_return_RT(self, M_EPs:np.ndarray, traffic_name:str, _debug=False):
+        
+        assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
+        # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
+        core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
+        ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
+        ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
+        traffic_scaling = self.Demand_scaling_factor/max(ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
 
+        scaled_M_EPs = traffic_scaling * M_EPs
+
+        arcs = self._network.generate_graph_arcs()
+        nexu = Nexullance_IT_interface(self.V, arcs, self.Cap_core, self.Cap_access, debug=_debug)        
+        nexu.set_parameters(0.1, 7.0, 0.00001, 5, 1000000, self.V*3, False)
+        nexu_result = nexu.run_IT(scaled_M_EPs, self.EPR)
+        print(f"max core link load from Nexullance_IT=", nexu_result.get_max_link_load())
+        print(f"resulting phi from Nexullance_IT=", nexu_result.get_phi())
+
+        return nexu_result.get_routing_table()
+    
     def run_and_profile_MD_nexullance_IT(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float], repetitions:int=10):
         # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
         assert(len(M_EPs_s) == len(M_EPs_weights))
@@ -235,7 +281,7 @@ class nexullance_exp_container:
         measured_PeakRAM=[]
         OBJ_s=[]
         for i in range(repetitions+1):
-            nexu = Nexullance_IT_interface(self.V, arcs, debug=False)        
+            nexu = Nexullance_IT_interface(self.V, arcs, self.Cap_core, self.Cap_access, debug=False)        
             nexu.set_parameters(0.1, 7.0, 0.00001, 5, 100000000, self.V*3, False)
             tracemalloc.start()
             nexu_result = nexu.run_MD_IT(M_EPs_s, M_EPs_weights, self.EPR)
@@ -257,36 +303,20 @@ class nexullance_exp_container:
         # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
         assert(len(M_EPs_s) == len(M_EPs_weights))
         arcs = self._network.generate_graph_arcs()
-        nexu = Nexullance_IT_interface(self.V, arcs, debug=_debug)        
+        nexu = Nexullance_IT_interface(self.V, arcs, self.Cap_core, self.Cap_access, debug=_debug)        
         nexu.set_parameters(0.1, 7.0, 0.00001, 5, 100000000, self.V*3, False)
         nexu_result = nexu.run_MD_IT(M_EPs_s, M_EPs_weights, self.EPR)
         return nexu_result.get_obj(), nexu_result.get_phis()
-        
-    def run_MD_nexullance_MP(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False):
-        # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
-        assert(len(M_EPs_s) == len(M_EPs_weights))
-        self._network.pre_calculate_APST_n(max_path_length)
-        md_nexu = MD_Nexullance_MP.MD_Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
-                                            self.Cap_core, self.Cap_access, self.V, M_EPs_s, M_EPs_weights, _verbose=_debug)
-        md_nexu.init_model(self.EPR)
-        maxL_NEXU_s, _ = md_nexu.solve()
-        phis=[]
-        for m, maxL_NEXU in enumerate(maxL_NEXU_s):
-            phis.append(gl.network_total_throughput(M_EPs_s[m], maxL_NEXU, maxL_NEXU)/(self.V*self.EPR))
-        return md_nexu.get_Objective_func()/(self.V*self.EPR), phis
     
-    def run_MD_nexullance_MP_return_RT(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False):
+    def run_MD_nexullance_IT_return_RT(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float], _debug=False):
         # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
         assert(len(M_EPs_s) == len(M_EPs_weights))
-        self._network.pre_calculate_APST_n(max_path_length)
-        md_nexu = MD_Nexullance_MP.MD_Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
-                                            self.Cap_core, self.Cap_access, self.V, M_EPs_s, M_EPs_weights, _verbose=_debug)
-        md_nexu.init_model(self.EPR)
-        maxL_NEXU_s, RT = md_nexu.solve()
-        phis=[]
-        for m, maxL_NEXU in enumerate(maxL_NEXU_s):
-            phis.append(gl.network_total_throughput(M_EPs_s[m], maxL_NEXU, maxL_NEXU)/(self.V*self.EPR))
-        return phis, RT
+        arcs = self._network.generate_graph_arcs()
+        nexu = Nexullance_IT_interface(self.V, arcs, self.Cap_core, self.Cap_access, debug=_debug)        
+        nexu.set_parameters(0.1, 7.0, 0.00001, 5, 100000000, self.V*3, False)
+        nexu_result = nexu.run_MD_IT(M_EPs_s, M_EPs_weights, self.EPR)
+        # print("resulting MD_Nexullance_IT obj function:", nexu_result.get_obj())
+        return nexu_result.get_obj(), nexu_result.get_routing_table()
         
     def run_and_profile_MD_nexullance_MP(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False, repetitions:int=10):
         # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
@@ -318,105 +348,31 @@ class nexullance_exp_container:
                 "ave_time[s]": st.mean(measured_time), "std_time[s]": st.stdev(measured_time), 
                 "ave_PeakRAM[B]": st.mean(measured_PeakRAM), "std_PeakRAM[B]": st.stdev(measured_PeakRAM)}
         
-
-    # def run_nexullance_OPT(self, M_EPs:np.ndarray, traffic_name:str):
-
-    #     assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
-
-    #     # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
-    #     core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
-    #     ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
-    #     ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
-    #     traffic_scaling = self.Demand_scaling_factor/max(ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
-
-    #     scaled_M_EPs = traffic_scaling * M_EPs
-
-    #     nexu = Nexullance_OPT.Nexullance_OPT(self._network.nx_graph, self.Cap_core, self.Cap_access, self.V, scaled_M_EPs)
-    #     nexu.init_model()
-    #     maxLcore_NEXU = nexu.solve()
-        
-    #     if maxLcore_NEXU is None:
-    #         # if maxLcore_NEXU is None, check if the bottleneck links are the access links
-
-    #         if ECMP_ASP_max_core_link_load > ECMP_ASP_max_access_link_load:
-    #             # ok, we guessed right, continue
-    #             Phi = gl.network_total_throughput(scaled_M_EPs, ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
-    #             return Phi/(self.V*self.EPR)
-    #         else:
-    #             # we guessed wrong, this need to be investigated, maybe the random starting point in gurobi is makeing the core link load lower than access link load.
-    #             Warning(f"no result is produced for traffic: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
-    #             return None
-                    
-    #     else:
-    #         # if it is valid, continue
-    #         ECMP_ASP_max_access_link_load = max(gl.access_link_flows_from_M_EPs(scaled_M_EPs))/self.Cap_access
-    #         assert(maxLcore_NEXU >= ECMP_ASP_max_access_link_load)
-    #         Phi = gl.network_total_throughput(scaled_M_EPs, maxLcore_NEXU, ECMP_ASP_max_access_link_load)
-    #         return Phi/(self.V*self.EPR)
-        
-
-    def run_nexullance_MP(self, max_path_length: int, M_EPs:np.ndarray, traffic_name:str):
-        
-        assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
-
+    def run_MD_nexullance_MP(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False):
+        # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
+        assert(len(M_EPs_s) == len(M_EPs_weights))
         self._network.pre_calculate_APST_n(max_path_length)
-
-        # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
-        core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
-        ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
-        ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
-        traffic_scaling = self.Demand_scaling_factor/max(ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
-
-        scaled_M_EPs = traffic_scaling * M_EPs
-
-        nexu = Nexullance_MP.Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
-                                           self.Cap_core, self.Cap_access, self.V, scaled_M_EPs)
-        nexu.init_model()
-        maxLcore_NEXU, _ = nexu.solve()
+        md_nexu = MD_Nexullance_MP.MD_Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
+                                            self.Cap_core, self.Cap_access, self.V, M_EPs_s, M_EPs_weights, _verbose=_debug)
+        md_nexu.init_model(self.EPR)
+        maxL_NEXU_s, _ = md_nexu.solve()
+        phis=[]
+        for m, maxL_NEXU in enumerate(maxL_NEXU_s):
+            phis.append(gl.network_total_throughput(M_EPs_s[m], maxL_NEXU, maxL_NEXU)/(self.V*self.EPR))
+        return md_nexu.get_Objective_func()/(self.V*self.EPR), phis
+    
+    def run_MD_nexullance_MP_return_RT(self, M_EPs_s:list[np.ndarray], M_EPs_weights:list[float],  max_path_length:int, _debug=False):
+        # assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
+        assert(len(M_EPs_s) == len(M_EPs_weights))
+        self._network.pre_calculate_APST_n(max_path_length)
+        md_nexu = MD_Nexullance_MP.MD_Nexullance_MP(self._network.nx_graph, self._network.__getattribute__(f"APST_{max_path_length}") ,
+                                            self.Cap_core, self.Cap_access, self.V, M_EPs_s, M_EPs_weights, _verbose=_debug)
+        md_nexu.init_model(self.EPR)
+        maxL_NEXU_s, RT = md_nexu.solve()
+        # phis=[]
+        # print("resulting MD_Nexullance_MP obj function:", md_nexu.get_Objective_func()/(self.V*self.EPR))
+        # for m, maxL_NEXU in enumerate(maxL_NEXU_s):
+        #     phis.append(gl.network_total_throughput(M_EPs_s[m], maxL_NEXU, maxL_NEXU)/(self.V*self.EPR))
+        # return phis, RT
+        return md_nexu.get_Objective_func()/(self.V*self.EPR), RT
         
-        if maxLcore_NEXU is None:
-            # if maxLcore_NEXU is None, check if the bottleneck links are the access links
-
-            if ECMP_ASP_max_core_link_load > ECMP_ASP_max_access_link_load:
-                Warning(f"access link is bottleneck under ECMP_ASP: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
-                # ok, we guessed right, continue
-                Phi = gl.network_total_throughput(scaled_M_EPs, ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
-                return Phi/(self.V*self.EPR), None
-            else:
-                # we guessed wrong, this need to be investigated, maybe the random starting point in gurobi is makeing the core link load lower than access link load.
-                Warning(f"no result is produced for traffic: {traffic_name}, {self.topo_name}({self.V}, {self.D}) network")
-                return None, None
-                    
-        else:
-            # if it is valid, continue
-            ECMP_ASP_max_access_link_load = max(gl.access_link_flows_from_M_EPs(scaled_M_EPs))/self.Cap_access
-            assert(maxLcore_NEXU >= ECMP_ASP_max_access_link_load)
-            Phi = gl.network_total_throughput(scaled_M_EPs, maxLcore_NEXU, ECMP_ASP_max_access_link_load)
-            return Phi/(self.V*self.EPR), maxLcore_NEXU
-        
-
-    def run_nexullance_IT(self, M_EPs:np.ndarray, traffic_name:str, _debug=False):
-        
-        assert(self.V*self.EPR == M_EPs.shape[0] == M_EPs.shape[1])
-
-        # Scale the traffic demand matrix, so that the max link load (under ECMP_ASP) equals to "Demand_scaling_factor"
-        core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, M_EPs)
-        ECMP_ASP_max_core_link_load = np.max(core_link_flows)/self.Cap_core
-        ECMP_ASP_max_access_link_load = np.max(access_link_flows)/self.Cap_access
-        traffic_scaling = self.Demand_scaling_factor/max(ECMP_ASP_max_core_link_load, ECMP_ASP_max_access_link_load)
-
-        scaled_M_EPs = traffic_scaling * M_EPs
-
-        arcs = self._network.generate_graph_arcs()
-        nexu = Nexullance_IT_interface(self.V, arcs, debug=_debug)        
-        
-
-        nexu.set_parameters(0.1, 7.0, 0.00001, 5, 1000000, self.V*3, False)
-        nexu_result = nexu.run_IT(scaled_M_EPs, self.EPR)
-
-        return nexu_result.get_phi(), nexu_result.get_max_link_load()
-        
-
-
-
-        # TODO: add method to run MD_Nexullance
