@@ -2,7 +2,7 @@ import gurobipy as gp
 from gurobipy import GRB
 import networkx as nx
 import numpy as np
-from globals import access_link_flows_from_M_EPs, convert_M_EPs_to_M_R, network_total_throughput
+from global_helpers import access_link_flows_from_M_EPs, convert_M_EPs_to_M_R, network_total_throughput
 
 Graph = nx.graph.Graph
 
@@ -70,12 +70,12 @@ class MD_Nexullance_MP:
         self.path_prob = {}
         link_load_var = []
         link_load_constr = []
-        self.max_loads = []
-        self.Objective_func = self.model.addVar(vtype=GRB.CONTINUOUS, name='self.Objective_func') # weighted average across all input M_Rs
+        self.phi_scaler = [] # phi_scaler = max(max_core_load, max_access_load, 1.0)
+        # self.Objective_func_inv = self.model.addVar(vtype=GRB.CONTINUOUS, name='self.Objective_func_inv') # weighted average across all input M_Rs
         for m in range(len(self.M_Rs)):
             link_load_var.append({})
             link_load_constr.append({})
-            self.max_loads.append(self.model.addVar(vtype=GRB.CONTINUOUS, name=f'max_load_{m}'))
+            self.phi_scaler.append(self.model.addVar(vtype=GRB.CONTINUOUS, name=f'phi_scaler_{m}'))
             for (u,v) in self.edge_list:
                 link_load_var[m][(u, v)]=self.model.addVar(vtype=GRB.CONTINUOUS, name=f'link_load_({u},{v})')
                 link_load_constr[m][(u, v)]= gp.LinExpr()
@@ -85,8 +85,15 @@ class MD_Nexullance_MP:
         normalization_constr={}
         unique_path_id=0
         for (s, d), paths in self.path_dict.items():
+            shortest_path_length = min([len(path) for path in paths])
+            num_of_shortest_paths = 0
+            for path in paths:
+                if len(path) == shortest_path_length:
+                    num_of_shortest_paths = num_of_shortest_paths +1 
+
             if len(paths)>1: 
                 normalization_constr[(s, d)]=gp.LinExpr()
+                # find the shortest path length:
 
             for path in paths:      
                 if len(paths)>1:  
@@ -94,6 +101,15 @@ class MD_Nexullance_MP:
 
                     self.path_prob[unique_path_id].setAttr(GRB.Attr.LB, 0)  # Lower bound
                     self.path_prob[unique_path_id].setAttr(GRB.Attr.UB, 1.0)  # Upper bound
+
+                    # if it is a shortest path, set the initial prob to 1.0/num_of_shortest_paths
+                    if len(path) == shortest_path_length:
+                        self.path_prob[unique_path_id].setAttr(GRB.Attr.Start, 1.0/num_of_shortest_paths)  # start value
+                        # self.path_prob[unique_path_id].start = 1.0/num_of_shortest_paths
+                    else: # else, set the initial prob to 0.0
+                        self.path_prob[unique_path_id].setAttr(GRB.Attr.Start, 0.0)  # start value
+                        # self.path_prob[unique_path_id].start = 0.0
+
                 else:
                     self.path_prob[unique_path_id]=1.0
 
@@ -108,29 +124,31 @@ class MD_Nexullance_MP:
         for m in range(len(self.M_Rs)):
             for (u, v), linexp in link_load_constr[m].items():
                 self.model.addConstr(linexp==link_load_var[m][(u, v)])
-                self.model.addConstr(self.max_loads[m]>=link_load_var[m][(u, v)])
-            self.model.addConstr(self.max_loads[m]>=self.max_access_link_loads[m])
+                self.model.addConstr(self.phi_scaler[m]>=link_load_var[m][(u, v)])
+            self.model.addConstr(self.phi_scaler[m]>=self.max_access_link_loads[m])
+            self.model.addConstr(self.phi_scaler[m]>=1.0)
         for linexp in normalization_constr.values():
             self.model.addConstr(linexp==1.0)
 
         # define the weighted max load as a weighted average from all input M_Rs
-        Objective_func_exp=gp.LinExpr()
-        for m, max_load in enumerate(self.max_loads):
-            Objective_func_exp += max_load*self.M_EP_weights[m]/(np.sum(self.M_EPs_s[m]))
-        self.model.addConstr(self.Objective_func==Objective_func_exp)
+        self.Objective_func_inv_exp=gp.LinExpr()
+        for m, scaler in enumerate(self.phi_scaler):
+            self.Objective_func_inv_exp += scaler*self.M_EP_weights[m]/(np.sum(self.M_EPs_s[m]))
+        # self.model.addConstr(self.Objective_func_inv==Objective_func_inv_exp)
 
         # print(f'number of variables = {len(self.path_prob)+len(link_load_var)}, number of constraints = {len(link_load_constr)+len(normalization_constr)}')
         # Set objective
-        self.model.setObjective(self.Objective_func, GRB.MINIMIZE)
+        # self.model.setObjective(self.Objective_func_inv, GRB.MINIMIZE)
+        self.model.setObjective(self.Objective_func_inv_exp, GRB.MINIMIZE)
 
     def get_Objective_func(self):
         if self.model.status == GRB.OPTIMAL:
-            if self.Objective_func.X == 0:
+            if self.Objective_func_inv_exp.getValue() == 0:
                 print("Warning: objective function is 0??")
                 return 0.0 # to avoid numerical error
             
             # assert(self.Objective_func.X > 0)
-            return 1/self.Objective_func.X # a harmonic mean of network data throughput
+            return 1/self.Objective_func_inv_exp.getValue() # a harmonic mean of network data throughput
         else:
             raise Exception("did not solve LP, or LP failed")
     
@@ -146,11 +164,11 @@ class MD_Nexullance_MP:
             #     self.model.printStats() # only print out data if verbose
             #     print(f'Max link load is: {self.Objective_func.x}')
 
-            Max_load_results = []
-            for m, max_load in enumerate(self.max_loads):
-                Max_load_results.append(max_load.x)
+            phi_scaler_results = []
+            for m, scaler in enumerate(self.phi_scaler):
+                phi_scaler_results.append(scaler.x)
                 if self.verbose:
-                    print(f'Max link load for M_R {m} is: {max_load.x}')
+                    print(f'Scaler for M_R {m} is: {scaler.x}')
 
             unique_path_id=0
             for (s,d), paths in self.path_dict.items():
@@ -161,7 +179,7 @@ class MD_Nexullance_MP:
                     else:
                         all_weighted_paths[(s, d)].append( (path, 1.0) )
                     unique_path_id+=1
-            return Max_load_results, all_weighted_paths
+            return phi_scaler_results, all_weighted_paths
             # return traffic_shared, result_link_loads, Max_load_result
         
         else:

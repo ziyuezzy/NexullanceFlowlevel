@@ -1,7 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import networkx as nx
-from globals import access_link_flows_from_M_EPs, convert_M_EPs_to_M_R
+from global_helpers import access_link_flows_from_M_EPs, convert_M_EPs_to_M_R
 import numpy as np
 
 Graph = nx.graph.Graph

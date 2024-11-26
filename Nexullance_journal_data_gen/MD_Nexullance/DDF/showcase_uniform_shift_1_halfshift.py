@@ -1,8 +1,8 @@
 import os
 import sys
-sys.path.append("/users/ziyzhang/topology-research")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../..')))
 from topologies import HPC_topo
-import globals as gl
+import global_helpers as gl
 import numpy as np
 import pickle
 import csv

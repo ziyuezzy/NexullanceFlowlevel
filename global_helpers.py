@@ -17,22 +17,6 @@ pf_configs = [(7, 3), (13, 4), (21, 5), (31, 6), (57, 8), (73, 9), (91, 10), (13
 pf_regular_configs = [(v,d) for v, d in pf_configs if v*d%2==0]
 
 
-# #Configurations:
-# #slimfly configurations:
-# # sf_configs= [722]
-# sf_configs= [(722, 29), (1058, 35)]
-# #jellyfish configurations:
-# jf_configs =  [(722, 29), (900,32), (1058, 35)]
-# #GDBG configurations, the degree is doubled because it is a directed graph: 
-# gdbg_configs = [(722, 29), (900,32), (1058, 35)]
-# #Equality configurations:
-# eq_configs= [ # Note that E443 config is fault on the equality paper, so here it is commented out
-# # (800, 31, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E443"),
-# (900, 32, [-1, 1, 23, 25, 55, 121, 135, 165, 177, 333, 457, 475, 495, 543, 549, 557, 585, 615, 717, 727], [70, 130, 194, 256, 320, 360], "E441"),
-# (1000, 33, [-1, 1, 27, 39, 45, 105, 215, 327, 365, 401, 455, 491, 523, 545, 547, 605, 653, 701, 715, 771, 801, 813, 865, 875, 955], [70, 180, 320, 430], "E442")
-# ]
-# ddf_configs=[(264, 11), (876, 17), (1386, 20)]
-
 def process_path_dict(path_dict):
     # input is a path dictionary
     average_path_lengths=[]
@@ -61,7 +45,6 @@ def process_weighted_path_dict(path_dict):
             average_length+=(len(path)-1)*weight
             if weight > 0.001:
                 temp_num_paths+=1
-        average_length
         average_path_lengths.append(average_length)
         num_paths.append(temp_num_paths)
     # Calculate the average path length of all s-d pairs, 
@@ -128,51 +111,6 @@ def calculate_data_shortest_paths(topology_instance, config):
     print(f"calculation done for {config} with shortest paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-# def calculate_data_shortest_paths_with_LP(topology_instance, config):
-#     edge_list=list(topology_instance.nx_graph.edges())
-#     _diameter=topology_instance.calculate_diameter()
-#     paths_dict=topology_instance.calculate_all_shortest_paths()
-
-#     _average_path_lengths, _num_paths=process_path_dict(paths_dict)
-#     _average_path_length_min=min(_average_path_lengths)
-#     _average_path_length_max=max(_average_path_lengths)
-#     _average_path_length_mean=mean(_average_path_lengths)
-#     _num_paths_min=min(_num_paths)
-#     _num_paths_max=max(_num_paths)
-#     _num_paths_mean=mean(_num_paths)
-
-#     link_load_dict=topology_instance.distribute_uniform_flow_on_paths(paths_dict)
-#     _load_dict=list(link_load_dict.values())
-#     _load_min=min(_load_dict)
-#     _load_max=max(_load_dict)
-#     _load_mean=mean(_load_dict)
-
-#     LP_weighted_path_dict=LP_cvspy.LP_load_balancing(paths_dict, edge_list)
-#     LP_weighted_link_load = topology_instance.distribute_uniform_flow_on_weighted_paths(LP_weighted_path_dict)
-#     LP_load_dict=list(LP_weighted_link_load.values())
-#     LP_load_min=min(LP_load_dict)
-#     LP_load_max=max(LP_load_dict)
-#     LP_load_mean=mean(LP_load_dict)
-    
-#     # s_d_bw_dist=list(topology_instance.s_d_bw_dist(paths_dict, link_load_dict).values())
-#     # s_d_bw_min=min(s_d_bw_dist)
-#     # s_d_bw_max=max(s_d_bw_dist)
-#     # s_d_bw_mean=mean(s_d_bw_dist)
-
-#     _result={ 
-#         "diameter": _diameter, 
-#         "ave_path_length_statistics": [_average_path_length_min, _average_path_length_mean, _average_path_length_max],
-#         "num_paths_statistics": [_num_paths_min, _num_paths_mean, _num_paths_max],
-#         "link_load_statistics": [_load_min, _load_mean, _load_max],
-#         "LP_weighted_link_load_statistics": [LP_load_min, LP_load_mean, LP_load_max]
-#         # "s_d_bw_statistics": [s_d_bw_min, s_d_bw_mean, s_d_bw_max],
-#         # "graph_edge_list": list(topology_instance.nx_graph.edges()),
-#         # "paths_dict": paths_dict
-#         }
-#     print(f"calculation done for {config} with LP-weighted paths routing")
-#     return _result, edge_list, paths_dict, LP_weighted_path_dict
-
-
 def calculate_DDF_routing(topology_instance, config):
     _diameter=topology_instance.calculate_diameter()
     paths_dict=topology_instance.DDF_unipath_routing()
@@ -207,7 +145,6 @@ def calculate_DDF_routing(topology_instance, config):
         }
     print(f"calculation done for {config} with unipath routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
-
 
 def calculate_data_k_shortest_paths(topology_instance, config, k):
     _diameter=topology_instance.calculate_diameter()
@@ -244,7 +181,6 @@ def calculate_data_k_shortest_paths(topology_instance, config, k):
     print(f"calculation done for {config} with {k} shortest paths routing")
     return _result, list(topology_instance.nx_graph.edges()), paths_dict
 
-
 def calculate_data_paths_within_length(topology_instance, config, max_path_length):
     _diameter=topology_instance.calculate_diameter()
     if (_diameter > max_path_length):
@@ -264,11 +200,6 @@ def calculate_data_paths_within_length(topology_instance, config, max_path_lengt
     _load_min=min(_load_dict)
     _load_max=max(_load_dict)
     _load_mean=mean(_load_dict)
-
-    # s_d_bw_dist=list(topology_instance.s_d_bw_dist(paths_dict, link_load_dict).values())
-    # s_d_bw_min=min(s_d_bw_dist)
-    # s_d_bw_max=max(s_d_bw_dist)
-    # s_d_bw_mean=mean(s_d_bw_dist)
 
     _result={ 
         "diameter": _diameter, 
@@ -332,6 +263,120 @@ def cal_weighted_ave_path_length(weighted_path_dict):
         for path, weight in paths:
             ave_path_length += weight*len(path)
     return ave_path_length/len(weighted_path_dict)
+
+def perturbate_gaussian(input_matrix: np.ndarray, perturbation_rate: float, print_output: bool=False, abs_perturbate:bool = False):
+    output_matrix = np.zeros_like(input_matrix)
+    num_nodes = input_matrix.shape[0]
+    max_entry = np.max(input_matrix)
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+            if abs_perturbate:
+                output_matrix[i][j] = input_matrix[i][j] + random.gauss(0, perturbation_rate*input_matrix[i][j])
+            else:
+                output_matrix[i][j] = input_matrix[i][j] + random.gauss(0, perturbation_rate*max_entry)
+            if output_matrix[i][j] < 0:
+                output_matrix[i][j] = 0    
+    if print_output:
+        print("Perturbed matrix:")
+        print(output_matrix)
+    return output_matrix
+
+def convert_M_EPs_to_M_R(M_EPs, num_routers, EPR):
+    assert(len(M_EPs)==len(M_EPs[0])==num_routers*EPR)
+    M_R_traffic_matrix=np.zeros((num_routers, num_routers))
+    for s in range(num_routers):
+        for d in range(num_routers):
+            if s==d:
+                continue
+            sum_M_R_flow=0
+            for sp in range(EPR):
+                for dp in range(EPR):
+                    sum_M_R_flow+=M_EPs[sp+s*EPR][dp+d*EPR]
+            M_R_traffic_matrix[s][d]=sum_M_R_flow
+
+    return M_R_traffic_matrix
+
+def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, seed=0):
+    random.seed(seed)
+    # Get the list of edges in the graph
+    assert(0<=LFR<1)
+    num_edges_to_delete=int(LFR * len(edgelist))
+    edges_to_delete = random.sample(edgelist, num_edges_to_delete)
+    def path_is_broken(path):
+        links_in_path=[(path[i], path[i+1]) for i in range(len(path)-1)]
+        for (u,v) in edges_to_delete:
+            if ((u,v) in links_in_path) or ((v,u) in links_in_path):
+                return True
+    success_rate={}    
+    #calculate the communication success rate statistics among s-d pairs
+    for (s,d), weighted_paths in weighted_path_dict.items():
+        success_rate[(s,d)]=0
+        for path, prob in weighted_paths:
+            if not path_is_broken(path):
+                success_rate[(s,d)]=success_rate[(s,d)]+prob
+    return mean(list(success_rate.values()))
+                    
+def access_link_flows_from_M_EPs(M_EPs):
+    access_link_flows=[]
+    M_EPs=np.array(M_EPs)
+    for row in M_EPs:
+        access_link_flows.append(np.sum(row))
+    for row in M_EPs.swapaxes(0,1):
+        access_link_flows.append(np.sum(row))
+    return access_link_flows
+
+def network_total_throughput(M_EPs, *args):
+    assert((len(args) == 1) or (len(args) == 2))
+    return np.sum(M_EPs)/max([1, *args])
+    # if len(args) == 2:
+    #     matrix_sum = np.sum(M_EPs)
+    #     return matrix_sum / max([args[0], args[1], 1])
+    # elif len(args) == 1:
+    #     matrix_sum = np.sum(M_EPs)
+    #     return matrix_sum / max([args[0], 1])
+
+
+# # automorphism methods using nauty:
+# import pynauty as nauty
+
+# def generate_nauty_graph_from_nx(nx_graph):
+#     adj_dict={n: list(nbrdict.keys()) for n, nbrdict in nx_graph.adjacency()}
+#     nauty_graph=nauty.Graph(nx_graph.number_of_nodes(), directed=False, adjacency_dict=adj_dict)
+#     return nauty_graph
+
+# def nauty_autgrp_verbose(nauty_graph, _verbose=True):
+#     # Compute the automorphism group
+#     aut_group = nauty.autgrp(nauty_graph)
+
+#     # Extract elements from the output tuple
+#     generators, grpsize1, grpsize2, orbits, numorbits = aut_group
+
+#     if _verbose:
+#         # Print the generators of the automorphism group
+#         print("Generators of the automorphism group:")
+#         print(generators)
+
+#         print("Size of the generator set:", len(generators))
+
+#         # print the size (order) of the group
+#         print("Size (order) of the automorphism group:", grpsize1*10**grpsize2)
+
+#         # Print the orbits of the vertices
+#         print("Orbits of the vertices:", orbits)
+
+#         # Print the number of orbits
+#         print("Number of orbits:", numorbits)
+
+#     return generators
+
+def cal_MD_obj_func(list_of_phis: list, weight: list):
+    assert len(list_of_phis) == len(weight)
+    # a harmonic mean of network data throughput
+    return 1/(sum([weight[i]/list_of_phis[i] for i in range(len(list_of_phis))]))
+
+
+
+# generate traffic demand matrices:
 
 def generate_uniform_traffic_demand_matrix(num_routers, EPR):
     total_num_EP=EPR*num_routers
@@ -423,143 +468,10 @@ def generate_random_gaussian_demand_matrix(num_routers, EPR, mean, std, seed=0):
                 traffic_matrix[i][j] = random.gauss(mean, std)
     return traffic_matrix
 
-
-def perturbate_gaussian(input_matrix: np.ndarray, perturbation_rate: float, print_output: bool=False, abs_perturbate:bool = False):
-    output_matrix = np.zeros_like(input_matrix)
-    num_nodes = input_matrix.shape[0]
-    max_entry = np.max(input_matrix)
-    for i in range(num_nodes):
-        for j in range(num_nodes):
-            if abs_perturbate:
-                output_matrix[i][j] = input_matrix[i][j] + random.gauss(0, perturbation_rate*input_matrix[i][j])
-            else:
-                output_matrix[i][j] = input_matrix[i][j] + random.gauss(0, perturbation_rate*max_entry)
-            if output_matrix[i][j] < 0:
-                output_matrix[i][j] = 0    
-    if print_output:
-        print("Perturbed matrix:")
-        print(output_matrix)
-    return output_matrix
-
-
-# def generate_all_reduce_traffic_demand_matrix(num_routers, EPR, _center):
-#     # center as the center of all-reduce operation
-#     total_num_EP=EPR*num_routers
-#     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
-#     for i in range(total_num_EP):
-#         if i != _center:
-#             traffic_matrix[i][_center]=1 # TODO: this is wrong, should be a tree structure
-#     return traffic_matrix
-
-# def generate_broadcast_traffic_demand_matrix(num_routers, EPR, _center):
-#     # center as the center of the broadcast operation
-#     total_num_EP=EPR*num_routers
-#     traffic_matrix=np.zeros((total_num_EP, total_num_EP))
-#     for i in range(total_num_EP):
-#         if i != _center:
-#             traffic_matrix[_center][i]=1 # TODO: this is wrong, should be a tree structure
-#     return traffic_matrix
-
-def convert_M_EPs_to_M_R(M_EPs, num_routers, EPR):
-    assert(len(M_EPs)==len(M_EPs[0])==num_routers*EPR)
-    M_R_traffic_matrix=np.zeros((num_routers, num_routers))
-    for s in range(num_routers):
-        for d in range(num_routers):
-            if s==d:
-                continue
-            sum_M_R_flow=0
-            for sp in range(EPR):
-                for dp in range(EPR):
-                    sum_M_R_flow+=M_EPs[sp+s*EPR][dp+d*EPR]
-            M_R_traffic_matrix[s][d]=sum_M_R_flow
-
-    return M_R_traffic_matrix
-
-
-def evaluate_weighted_pathdict_LF_resilience(edgelist, weighted_path_dict, LFR, seed=0):
-    random.seed(seed)
-    # Get the list of edges in the graph
-    assert(0<=LFR<1)
-    num_edges_to_delete=int(LFR * len(edgelist))
-    edges_to_delete = random.sample(edgelist, num_edges_to_delete)
-
-    def path_is_broken(path):
-        links_in_path=[(path[i], path[i+1]) for i in range(len(path)-1)]
-        for (u,v) in edges_to_delete:
-            if ((u,v) in links_in_path) or ((v,u) in links_in_path):
-                return True
-            
-    success_rate={}    
-    #calculate the communication success rate statistics among s-d pairs
-    for (s,d), weighted_paths in weighted_path_dict.items():
-        success_rate[(s,d)]=0
-        for path, prob in weighted_paths:
-            if not path_is_broken(path):
-                success_rate[(s,d)]=success_rate[(s,d)]+prob
-
-    return mean(list(success_rate.values()))
-                    
-def access_link_flows_from_M_EPs(M_EPs):
-    access_link_flows=[]
-    M_EPs=np.array(M_EPs)
-    for row in M_EPs:
-        access_link_flows.append(np.sum(row))
-    for row in M_EPs.swapaxes(0,1):
-        access_link_flows.append(np.sum(row))
-    return access_link_flows
-
-def network_total_throughput(M_EPs, max_core_link_load, max_access_link_load):
-    array_sum = np.sum(M_EPs)
-    if max_core_link_load<1 and max_access_link_load<1:
-        return array_sum
-    else:
-        return array_sum / max([max_core_link_load, max_access_link_load])
-
-
-
-# # automorphism methods using nauty:
-# import pynauty as nauty
-
-# def generate_nauty_graph_from_nx(nx_graph):
-#     adj_dict={n: list(nbrdict.keys()) for n, nbrdict in nx_graph.adjacency()}
-#     nauty_graph=nauty.Graph(nx_graph.number_of_nodes(), directed=False, adjacency_dict=adj_dict)
-#     return nauty_graph
-
-# def nauty_autgrp_verbose(nauty_graph, _verbose=True):
-#     # Compute the automorphism group
-#     aut_group = nauty.autgrp(nauty_graph)
-
-#     # Extract elements from the output tuple
-#     generators, grpsize1, grpsize2, orbits, numorbits = aut_group
-
-#     if _verbose:
-#         # Print the generators of the automorphism group
-#         print("Generators of the automorphism group:")
-#         print(generators)
-
-#         print("Size of the generator set:", len(generators))
-
-#         # print the size (order) of the group
-#         print("Size (order) of the automorphism group:", grpsize1*10**grpsize2)
-
-#         # Print the orbits of the vertices
-#         print("Orbits of the vertices:", orbits)
-
-#         # Print the number of orbits
-#         print("Number of orbits:", numorbits)
-
-#     return generators
-
-def cal_MD_obj_func(list_of_phis: list, weight: list):
-    assert len(list_of_phis) == len(weight)
-    # a harmonic mean of network data throughput
-    return 1/(sum([weight[i]/list_of_phis[i] for i in range(len(list_of_phis))]))
-
-
 def gen_M_EPs_s(topo_name: str, V:int, D:int, EPR:int, M_names:list[str], scaling_factor:float=0.0, Cap_core:int=10, Cap_access:int=10):
     
-    import sys
-    sys.path.append("/users/ziyzhang/topology-research")
+    import os, sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from topologies import HPC_topo
     
     _network = HPC_topo.HPC_topo.initialize_child_instance(topo_name+"topo", V, D)

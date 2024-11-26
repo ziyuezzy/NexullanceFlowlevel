@@ -6,8 +6,9 @@ from joblib import Parallel, delayed
 MAX_KERNELS = 1 # define maximum threads to run
 import numpy as np
 import random
-from globals import convert_M_EPs_to_M_R, access_link_flows_from_M_EPs, ECMP
-
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')))
+from global_helpers import convert_M_EPs_to_M_R, access_link_flows_from_M_EPs, ECMP
 
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods
 
@@ -27,7 +28,9 @@ class HPC_topo():
         return [sub.__name__ for sub in cls.__subclasses__()]
     
     @classmethod
-    def initialize_child_instance(cls, child_class_name, *args, **kwargs):
+    def initialize_child_instance(cls, child_class_name:str, *args, **kwargs):
+        if not child_class_name.endswith("topo"):
+            child_class_name = child_class_name + "topo" 
         cls.import_child_classes()
         child_classes = cls.__subclasses__()
         for sub in child_classes:

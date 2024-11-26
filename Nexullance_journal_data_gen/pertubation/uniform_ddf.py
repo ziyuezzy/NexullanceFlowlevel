@@ -1,6 +1,6 @@
 import sys
-sys.path.append("/users/ziyzhang/topology-research/")
-import globals as gl
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..')))
+import global_helpers as gl
 import numpy as np
 import csv
 from nexullance.ultility import nexullance_exp_container
