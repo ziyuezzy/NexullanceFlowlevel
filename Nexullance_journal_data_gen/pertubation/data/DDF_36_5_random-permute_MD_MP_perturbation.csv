@@ -1,4 +1,4 @@
-V,D,perturbation_rate,repetition_id,MD_MP_phis_training,MD_MP_phis_verification,MD_MP_phis_trained_on_verification_set
+V,D,perturbation_rate,repetition_id,MD_MP_training,MD_MP_verification,MD_MP_trained_on_verification_set
 36,5,0.1,0,5.232653515074354,5.283969244549137,5.283969244549137
 36,5,0.1,1,5.178955022468626,5.313552559091726,5.313552559091726
 36,5,0.1,2,5.235441496766782,5.381898882063504,5.381898882063504

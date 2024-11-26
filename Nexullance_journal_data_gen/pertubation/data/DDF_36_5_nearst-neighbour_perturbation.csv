@@ -1,4 +1,4 @@
-V,D,perturbation_rate,repetition_id,MD_MP_phis_training,Nexullance_MP_APST_original_phis,ECMP_ASP_phis
+V,D,perturbation_rate,repetition_id,Nexullance_MP_optimal,Nexullance_MP_unperturbated,ECMP_ASP
 36,5,0.1,0,8.080047370285957,1.7617587105515968,6.156139330560982
 36,5,0.1,1,7.768565487718814,1.8951772918199483,6.137091439421539
 36,5,0.1,2,7.787377349349247,1.848210384770066,6.111368360065855

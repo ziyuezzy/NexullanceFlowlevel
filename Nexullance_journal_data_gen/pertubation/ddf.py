@@ -108,8 +108,8 @@ def main():
 
 
         # write to csv file 1:
-        csv_cols = ['V', 'D', 'perturbation_rate', 'repetition_id', 'MD_MP_phis_training', 
-                    'Nexullance_MP_APST_original_phis', 'ECMP_ASP_phis']
+        csv_cols = ['V', 'D', 'perturbation_rate', 'repetition_id', 'Nexullance_MP_optimal', 
+                    'Nexullance_MP_unperturbated', 'ECMP_ASP']
         filename = f'{topo_name}_{V}_{D}_{traffic_name}_perturbation.csv'
         # save data to csv file
         with open(filename, 'a', newline='') as csvfile:
@@ -123,8 +123,8 @@ def main():
                     csvfile.flush()
                     
         # write to csv file 2:
-        csv_cols = ['V', 'D', 'perturbation_rate', 'repetition_id', 'MD_MP_phis_training',
-                    'MD_MP_phis_verification', 'MD_MP_phis_trained_on_verification_set']
+        csv_cols = ['V', 'D', 'perturbation_rate', 'repetition_id', 'MD_MP_training',
+                    'MD_MP_verification', 'MD_MP_trained_on_verification_set']
         filename = f'{topo_name}_{V}_{D}_{traffic_name}_MD_MP_perturbation.csv'
         # save data to csv file
         with open(filename, 'a', newline='') as csvfile:
