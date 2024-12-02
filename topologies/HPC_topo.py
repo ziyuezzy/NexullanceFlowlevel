@@ -144,7 +144,7 @@ class HPC_topo():
         paths_dict = {}
         for (v1, v2) in vertex_pairs:
             paths_dict[(v1, v2)] = nx_paths_dict[v1][v2]
-        # self.ASP = paths_dict
+        self.ASP = paths_dict
         self.ECMP_ASP = ECMP(paths_dict)
 
     def pre_calculate_APST_n(self, max_length:int):
@@ -168,6 +168,14 @@ class HPC_topo():
                 raise ValueError(f"Error, no path found between vertex {v1} and vertex {v2}")
             paths_dict[(v1, v2)]=all_paths
         self.__setattr__(f"APST_{max_length}", paths_dict)
+
+
+    def pre_calculate_ECMP_nSP(self, num_pahts:int):
+        if hasattr(self, f"{num_pahts}SP"):
+            return
+        paths_dict, _ = self.calculate_all_k_shortest_paths(num_pahts)
+        self.__setattr__(f"{num_pahts}SP", paths_dict)
+        self.__setattr__(f"ECMP_{num_pahts}SP", ECMP(paths_dict))
 
     # def pre_calculate_ECMP_APST_n(self, max_length:int):
     #     if hasattr(self, f"ECMP_APST_{max_length}"):
