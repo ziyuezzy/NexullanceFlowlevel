@@ -241,7 +241,7 @@ class nexullance_exp_container:
         else:
             core_link_flows, access_link_flows = self._network.distribute_M_EPs_on_weighted_paths(self._network.ECMP_ASP, self.EPR, scaled_M_EPs)
         
-        ECMP_ASP_phi = gl.network_total_throughput(scaled_M_EPs, max(core_link_flows), max(access_link_flows))/(self.V*self.EPR)
+        ECMP_ASP_phi = gl.network_total_throughput(scaled_M_EPs, max(core_link_flows)/self.Cap_core, max(access_link_flows)/self.Cap_access)/(self.V*self.EPR)
         return ECMP_ASP_phi
 
 

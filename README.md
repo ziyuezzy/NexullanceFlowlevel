@@ -1,44 +1,52 @@
-# HPC network research
 
-# required python packages:
+This repository serves as a data-reproducing source for the paper 'Nexullance: Link load-balancing for HPC networks'  submitted to IATON in 2025.
+
+## required python packages:
 numpy, matplotlib, networkx, joblib (for multi-thread cpu algorithms), galois (for slimfly), gurobipy, (pynauty)
 
 install: 
-apt install python3 pip (need python 3.12)
-pip3.12 install numpy matplotlib networkx joblib galois gurobipy pynauty pandas pybind11
+apt install python3.12-dev (need python 3.12)
+apt install libboost-all-dev libeigen3-dev  (for making and using IT_boost)
+pip3.12 install numpy matplotlib networkx joblib galois gurobipy pandas pybind11 cmake 
 
-# classes in folder "topolgies/":
-Slimfly, RRG and Equality are implemented as child classes of "HPC_topo" which are based on undiretional graphs.
-While GDBG is implemented separately because of its di-graph nature.
+# Overview:
+## subdir "topolgies/":
+Network topologies are defined here. Some helper functions are implemented here, e.g., calculating paths and link loads.
 
-
-# Definitions and Notations for flow-level modeling:
-
-See Nexullance paper draft section II
-
-# Nexullance:
-
-Nexullance is an flow-level optimization technique for core link load balancing. Detail description can be found in the nexullance paper draft section III.
-
-Input: 
-inter-router graph, traffic demand matrix
-
-Output:
-Link load distribution,
-(ideally, ) also the traffic-agnostic routing tables,
-
-Measurements:
-Execution time,
-RAM occupation,
+Slimfly, RRG(Jellyfish), Dally-DragonFly, Polarfly, etc, network topologies are implemented as child classes of "HPC_topo" which are based on undiretional graphs.
+GDBG is implemented separately because of its di-graph nature.
 
 
-## Nexullance formulations :
-Nexullance_OPT: an optimal LP formulation
-Nexullance_MP: a near-optimal LP formulation
-Nexullance_IT: a heuristic
+
+## subdir "nexullance/":
+
+Here is the implementation of The Nexullance method.
+
+Nexullance is an flow-level optimization technique for core link load balancing. Some basics about flow-level modeling, and detail descriptions of the Nexullance method can be found in the nexullance paper. 
+
+For Single-Demand Nexullance (SD_Nexullance), three formulations are implemented:
+* the optimal formulation (topology-research/nexullance/Nexullance_OPT.py)
+* the LP formulation (topology-research/nexullance/Nexullance_MP.py)
+* the iterative heuristic (topology-research/nexullance/IT_boost/src/Nexullance_IT.cpp)
+
+For Multi-Demand Nexullance (MD_Nexullance), two formulations are implemented:
+* the LP formulation (topology-research/nexullance/MD_Nexullance_MP/MD_Nexullance_MP.py)
+* the iterative heuristic (topology-research/nexullance/IT_boost/src/MD_Nexullance_IT.cpp)
+
+Note that the optimal formulation and LP formulations uses GUROBI, which uses Clang underneath.
+The iterative heuristics are implemented in C++, and can be exported as library in python with pybind11.
+
+## subdir "Nexullance_journal_data_gen/":
+
+Some python files that generates the data for the IATON paper.
+/groups/ilabt-imec-be/hpcnetworksimulation/ziyzhang/topology-research/
+
+Notebooks in "Nexullance_journal_data_gen/demand_matrices" generates figure 2.
+
+Notebooks in "/groups/ilabt-imec-be/hpcnetworksimulation/ziyzhang/topology-research/Nexullance_journal_data_gen/Nexullance_compare" generates figure 3 and 4
 
 
-# Update April 2024:
+<!-- # Update April 2024:
 
 There are some useful functions in networkx source code that are not in the documentation, such as "single_source_all_shortest_paths" and "all_pairs_all_shortest_paths"
 
@@ -51,4 +59,4 @@ The time complexity of "all_pairs_all_shortest_paths" is simply V times the time
 https://networkx.org/documentation/stable/_modules/networkx/algorithms/shortest_paths/generic.html#all_shortest_paths
 
 Bayesian Optimization: 
-https://github.com/bayesian-optimization/BayesianOptimization
+https://github.com/bayesian-optimization/BayesianOptimization -->
