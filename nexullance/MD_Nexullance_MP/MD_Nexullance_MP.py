@@ -8,11 +8,7 @@ Graph = nx.graph.Graph
 
 NUM_threads=1
 
-gp_options = {
-    "WLSACCESSID": "6f6ff6a8-32e2-447d-b681-592b24fc09d1",
-    "WLSSECRET": "333995b6-ce3f-4053-b4bf-7dcdb2b167df",
-    "LICENSEID": 2411299,
-}
+from gurobi_license import gp_options
 
 class MD_Nexullance_MP:
     # This is a version of Nexullance_MP that optimize the routing table accroding to many different inter-router traffic demand matrices
