@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../..')))
 from topologies.DDF import DDFtopo
-import globals as gl
+import global_helpers as gl
 import numpy as np
 import csv
 
