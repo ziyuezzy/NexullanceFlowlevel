@@ -44,8 +44,11 @@ def pickle_nexullance_paths(topo_name: str, topo_config: tuple, Cap_core, Cap_ac
                 shift = int(traffic_pattern[6:])
                 M_EPs = gl.generate_shift_traffic_demand_matrix(V, EPR, shift)
             except ValueError:
-                print(f"Error: traffic pattern: ", traffic_pattern)
-                sys.exit(1)
+                if traffic_pattern == "shift_half":
+                    M_EPs = gl.generate_shift_traffic_demand_matrix(V, EPR, EPR*V//2)
+                else:
+                    print(f"Error: traffic pattern: ", traffic_pattern)
+                    sys.exit(1)
         else:
             print(f"Error: invalid traffic pattern: ", traffic_pattern)
             sys.exit(1)
