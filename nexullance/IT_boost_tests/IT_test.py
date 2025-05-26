@@ -1,9 +1,13 @@
 import sys
-from paths import IT_boost_bin
-sys.path.append(IT_boost_bin)
-from Nexullance_IT_cpp import Nexullance_IT_interface
-import global_helpers as gl
-import topologies.RRG as RRG
+import importlib
+from topoResearch.paths import *
+sys.path.append(IT_boost_debug)
+print(sys.path)
+from Nexullance_IT_cpp import *
+import Nexullance_IT_cpp
+print(Nexullance_IT_cpp.__file__)
+import topoResearch.global_helpers as gl
+import topoResearch.topologies.RRG as RRG
 import numpy as np
 
 V = 16
@@ -27,6 +31,6 @@ M_EPs = traffic_scaling * M_EPs
 remote_link_flows, local_link_flows = _network.distribute_M_EPs_on_weighted_paths(ECMP_ASP, EPR, M_EPs)
 M_R = gl.convert_M_EPs_to_M_R(M_EPs, V, EPR)
 
-nexu_it = Nexullance_IT_interface(V, arcs, 10.0, 10.0, True)
+nexu_it = Nexullance_IT_interface(V, arcs, 10.0, 10.0, False)
 # nexu_it.set_parameters(0.1, 7.0)
 nexu_it.run_IT(M_EPs, EPR)

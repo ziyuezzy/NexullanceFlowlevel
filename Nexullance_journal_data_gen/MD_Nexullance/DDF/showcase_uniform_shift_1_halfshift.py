@@ -17,7 +17,7 @@ csv_cols = ['V', 'D', 'M_name', 'M_weight', 'phi_ECMP_ASP', 'phi_MP_APST4', 'phi
 
 
 def main():
-    config = gl.ddf_configs[1]
+    config = gl.ddf_configs[0]
     V = config[0]
     D = config[1]
     EPR = (D+1)//2

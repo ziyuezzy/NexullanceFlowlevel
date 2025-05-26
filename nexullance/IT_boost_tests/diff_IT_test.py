@@ -1,7 +1,7 @@
 import sys
 from topoResearch.paths import IT_boost_debug
 sys.path.append(IT_boost_debug)
-from Nexullance_IT_cpp import Nexullance_IT_interface
+from Nexullance_IT_cpp import diff_Nexullance_IT_interface
 import topoResearch.global_helpers as gl
 import topoResearch.topologies.RRG as RRG
 import numpy as np
@@ -33,6 +33,13 @@ max_local_link_load = np.max(local_link_flows)/Cap_local
 traffic_scaling = 10.0/max(max_local_link_load, max_remote_link_load)
 half_shift_M_EPs = traffic_scaling * M_EPs
 
-nexu_it = Nexullance_IT_interface(V, arcs, 10.0, 10.0, True)
+nexu_it = diff_Nexullance_IT_interface(V, arcs, 10.0, 10.0, False, True)
 # nexu_it.set_parameters(0.1, 7.0)
-nexu_it.run_MD_IT([uniform_M_EPs, half_shift_M_EPs], [0.7, 0.3], EPR)
+results = nexu_it.run_for_batch_matrices([uniform_M_EPs, half_shift_M_EPs], EPR)
+
+for i, res in enumerate(results):
+    print("======for matrix no. ", i, "======")
+    print("elasped_time: ", res.get_elapsed_time())
+    print("max_load: ", res.get_max_core_link_load())
+    print("phi: ", res.get_phi())
+    print("num_attempts: ", res.get_num_attempts())
