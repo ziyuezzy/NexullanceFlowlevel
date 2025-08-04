@@ -1,6 +1,7 @@
 import sys
-from topoResearch.paths import IT_boost_debug
-sys.path.append(IT_boost_debug)
+from topoResearch.paths import IT_boost_debug, IT_boost_release
+sys.path.append(IT_boost_release)
+# sys.path.append(IT_boost_debug)
 from Nexullance_IT_cpp import diff_Nexullance_IT_interface
 import topoResearch.global_helpers as gl
 import topoResearch.topologies.RRG as RRG

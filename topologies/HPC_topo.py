@@ -169,6 +169,71 @@ class HPC_topo():
             paths_dict[(v1, v2)]=all_paths
         self.__setattr__(f"APST_{max_length}", paths_dict)
 
+    # TODO: the folloing method calculates all disjoint paths within a certain length
+    def pre_calculate_disjoint_APST_n(self, max_length:int, verbose:bool=False):
+        # Check if already calculated
+        if hasattr(self, f"disjoint_APST_{max_length}"):
+            return
+            
+        # First calculate all paths within the length
+        self.pre_calculate_APST_n(max_length)
+        all_paths_dict = getattr(self, f"APST_{max_length}")
+        
+        if verbose:
+            # Calculate statistics before filtering
+            total_paths_before = sum(len(paths) for paths in all_paths_dict.values())
+            avg_paths_per_pair_before = total_paths_before / len(all_paths_dict)
+            total_length_before = sum(len(path) for paths in all_paths_dict.values() for path in paths)
+            avg_length_before = total_length_before / total_paths_before if total_paths_before > 0 else 0
+            
+            print(f"Before disjoint filtering (max_length={max_length}):")
+            print(f"  Total paths: {total_paths_before}")
+            print(f"  Average paths per pair: {avg_paths_per_pair_before:.2f}")
+            print(f"  Average path length: {avg_length_before:.2f}")
+        
+        disjoint_paths_dict = {}
+        
+        # For each vertex pair, find node-disjoint paths
+        for (v1, v2), all_paths in all_paths_dict.items():
+            disjoint_paths = []
+            
+            for path in all_paths:
+                # Check if this path is node-disjoint with all previously selected paths
+                is_disjoint = True
+                for selected_path in disjoint_paths:
+                    # Check if paths share any intermediate nodes (excluding source and destination)
+                    path_nodes = set(path[1:-1])  # Exclude first and last nodes
+                    selected_nodes = set(selected_path[1:-1])  # Exclude first and last nodes
+                    
+                    if path_nodes & selected_nodes:  # If intersection is not empty
+                        is_disjoint = False
+                        break
+                
+                if is_disjoint:
+                    disjoint_paths.append(path)
+            
+            if not disjoint_paths:
+                raise ValueError(f"Error, no disjoint path found between vertex {v1} and vertex {v2}")
+            
+            disjoint_paths_dict[(v1, v2)] = disjoint_paths
+        
+        if verbose:
+            # Calculate statistics after filtering
+            total_paths_after = sum(len(paths) for paths in disjoint_paths_dict.values())
+            avg_paths_per_pair_after = total_paths_after / len(disjoint_paths_dict)
+            total_length_after = sum(len(path) for paths in disjoint_paths_dict.values() for path in paths)
+            avg_length_after = total_length_after / total_paths_after if total_paths_after > 0 else 0
+            
+            print(f"After disjoint filtering:")
+            print(f"  Total paths: {total_paths_after}")
+            print(f"  Average paths per pair: {avg_paths_per_pair_after:.2f}")
+            print(f"  Average path length: {avg_length_after:.2f}")
+            print(f"  Reduction: {total_paths_before - total_paths_after} paths ({((total_paths_before - total_paths_after) / total_paths_before * 100):.1f}%)")
+        
+        # Store the result as an attribute
+        self.__setattr__(f"disjoint_APST_{max_length}", disjoint_paths_dict)
+    
+
 
     def pre_calculate_ECMP_nSP(self, num_pahts:int):
         if hasattr(self, f"{num_pahts}SP"):
