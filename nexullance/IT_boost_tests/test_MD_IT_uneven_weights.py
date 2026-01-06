@@ -1,5 +1,7 @@
-import os
 import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
 from topologies import HPC_topo
 import global_helpers as gl
 import numpy as np

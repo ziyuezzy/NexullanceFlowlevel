@@ -7,7 +7,14 @@ MAX_KERNELS = 1 # define maximum threads to run
 import numpy as np
 import random
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')))
+from pathlib import Path
+
+# Add parent directory to path for imports
+TOPO_DIR = Path(__file__).resolve().parent
+TOPO_RESEARCH_DIR = TOPO_DIR.parent
+if str(TOPO_RESEARCH_DIR) not in sys.path:
+    sys.path.insert(0, str(TOPO_RESEARCH_DIR))
+
 from global_helpers import convert_M_EPs_to_M_R, access_link_flows_from_M_EPs, ECMP
 
 #TODO: check "bfs", "all_pairs_shortest_path" and "Floyd–Warshall algorithm", for speeding up the methods
@@ -16,11 +23,12 @@ class HPC_topo():
     
     @classmethod
     def import_child_classes(cls):
-        from .DDF import DDFtopo
-        from .Slimfly import Slimflytopo
-        from .Equality import Equalitytopo
-        from .RRG import RRGtopo
-        from .Polarfly import Polarflytopo
+        # Use absolute imports with sys.path handling
+        import topologies.DDF as DDF_module
+        import topologies.Slimfly as Slimfly_module
+        import topologies.Equality as Equality_module
+        import topologies.RRG as RRG_module
+        import topologies.Polarfly as Polarfly_module
 
     @classmethod
     def get_child_classes(cls):

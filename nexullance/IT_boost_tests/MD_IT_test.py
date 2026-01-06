@@ -1,6 +1,9 @@
 import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
 from paths import IT_boost_bin
-sys.path.append(IT_boost_bin)
+sys.path.append(str(IT_boost_bin))
 from Nexullance_IT_cpp import Nexullance_IT_interface
 import global_helpers as gl
 import topologies.RRG as RRG

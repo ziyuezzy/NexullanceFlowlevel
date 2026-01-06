@@ -3,9 +3,16 @@
 # https://github.ugent.be/davpouck/topology-research/blob/main/topologies/polarfly.py
 
 import networkx as nx
-from . import HPC_topo
+import sys
+from pathlib import Path
 import numpy as np
 
+# Add current directory to path for imports
+TOPO_DIR = Path(__file__).resolve().parent
+if str(TOPO_DIR) not in sys.path:
+    sys.path.insert(0, str(TOPO_DIR))
+
+import HPC_topo
 
 
 def compute_coeffs(i, primePower, primeFactor):

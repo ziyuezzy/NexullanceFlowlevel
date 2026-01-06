@@ -1,5 +1,13 @@
-from . import HPC_topo
 import networkx as nx
+import sys
+from pathlib import Path
+
+# Add current directory to path for imports
+TOPO_DIR = Path(__file__).resolve().parent
+if str(TOPO_DIR) not in sys.path:
+    sys.path.insert(0, str(TOPO_DIR))
+
+import HPC_topo
 
 class GDBG_topo(HPC_topo.HPC_topo):
 
