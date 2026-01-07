@@ -50,6 +50,17 @@ class HPC_topo():
         self.nx_graph = nx.Graph()
         self.diameter = None
 
+    def get_nx_graph(self) -> nx.Graph:
+        return self.nx_graph
+    
+    def set_endpoints_per_router(self, num_endpoints_per_router: int):
+        '''
+        Set the number of endpoints per router for all routers in the topology.\n
+        This will assign an equal number of endpoints to each router.
+        '''
+        for node in self.nx_graph.nodes():
+            self.nx_graph.nodes[node]['endpoints'] = num_endpoints_per_router
+
     # def get_vertices(self):
     #     return list(self.nx_graph.nodes())
 
