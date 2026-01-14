@@ -9,7 +9,10 @@ TOPO_DIR = Path(__file__).resolve().parent
 if str(TOPO_DIR) not in sys.path:
     sys.path.insert(0, str(TOPO_DIR))
 
-from HPC_topo import HPC_topo
+try:
+    from .HPC_topo import HPC_topo
+except ImportError:
+    from HPC_topo import HPC_topo
 
 # Dally DragonFly (DDF) network topology
 class DDFtopo(HPC_topo):

@@ -10,7 +10,10 @@ TOPO_DIR = Path(__file__).resolve().parent
 if str(TOPO_DIR) not in sys.path:
     sys.path.insert(0, str(TOPO_DIR))
 
-from HPC_topo import HPC_topo
+try:
+    from .HPC_topo import HPC_topo
+except ImportError:
+    from HPC_topo import HPC_topo
 
 #========================some functions to calculate the MMS graph=======================================
 # This part of the code is copied from this github repo: https://github.com/AdamLatos/slimfly-gen/blob/master/

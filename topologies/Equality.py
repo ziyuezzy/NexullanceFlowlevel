@@ -8,7 +8,10 @@ TOPO_DIR = Path(__file__).resolve().parent
 if str(TOPO_DIR) not in sys.path:
     sys.path.insert(0, str(TOPO_DIR))
 
-from HPC_topo import HPC_topo
+try:
+    from .HPC_topo import HPC_topo
+except ImportError:
+    from HPC_topo import HPC_topo
 
 # Notations for Equality network:
 # n = number of routers; k = inter-router radix; p = number of endpoints per router

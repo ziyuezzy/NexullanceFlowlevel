@@ -12,8 +12,10 @@ TOPO_DIR = Path(__file__).resolve().parent
 if str(TOPO_DIR) not in sys.path:
     sys.path.insert(0, str(TOPO_DIR))
 
-import HPC_topo
-
+try:
+    from .HPC_topo import HPC_topo
+except ImportError:
+    from HPC_topo import HPC_topo
 
 def compute_coeffs(i, primePower, primeFactor):
     coeffs = [0 for j in range(primePower)]
@@ -249,10 +251,7 @@ class BrownGenerator():
     # def get_file_name(self, q : int) -> str:
     #     return "Brown." + str(q) + ".adj.txt"
 
-
-
-
-class Polarflytopo(HPC_topo.HPC_topo):
+class Polarflytopo(HPC_topo):
     def __init__(self, *args, **kwargs):
         """
         q: prime power
