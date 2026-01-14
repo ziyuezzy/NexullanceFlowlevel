@@ -51,7 +51,7 @@ class nexullance_exp_container:
 
         if not topo_name.endswith("topo"):
             topo_name = topo_name + "topo"
-        self._network = HPC_topo.HPC_topo.initialize_child_instance(topo_name, V, D)
+        self._network = HPC_topo.initialize_child_instance(topo_name, V, D)
         self._network.pre_calculate_ECMP_ASP()
 
 
@@ -297,7 +297,7 @@ class nexullance_exp_container:
         nexu = Nexullance_IT_interface(self.V, arcs, self.Cap_core, self.Cap_access, debug=_debug)        
         nexu.set_parameters(0.1, 7.0, 0.00001, 5, 1000000, self.V*3, False)
         nexu_result = nexu.run_IT(scaled_M_EPs, self.EPR)
-        print(f"max core link load from Nexullance_IT=", nexu_result.get_max_link_load())
+        print(f"max core link load from Nexullance_IT=", nexu_result.get_max_core_link_load())
         print(f"resulting phi from Nexullance_IT=", nexu_result.get_phi())
 
         return nexu_result.get_routing_table()

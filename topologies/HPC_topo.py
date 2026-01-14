@@ -23,12 +23,12 @@ class HPC_topo():
     
     @classmethod
     def import_child_classes(cls):
-        # Use absolute imports with sys.path handling
-        import topologies.DDF as DDF_module
-        import topologies.Slimfly as Slimfly_module
-        import topologies.Equality as Equality_module
-        import topologies.RRG as RRG_module
-        import topologies.Polarfly as Polarfly_module
+        # Import topology modules to register subclasses
+        import topoResearch.topologies.RRG
+        import topoResearch.topologies.DDF
+        import topoResearch.topologies.Slimfly
+        import topoResearch.topologies.Equality
+        import topoResearch.topologies.Polarfly
 
     @classmethod
     def get_child_classes(cls):
