@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Add project root to path for robust imports from anywhere
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 # Import all topology classes
 from topoResearch.topologies.HPC_topo import HPC_topo
 from topoResearch.topologies.RRG import RRGtopo

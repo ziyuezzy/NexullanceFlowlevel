@@ -50,8 +50,22 @@ class HPC_topo():
         self.nx_graph = nx.Graph()
         self.diameter = None
 
-    def get_nx_graph(self) -> nx.Graph:
-        return self.nx_graph
+    def get_nx_graph(self, sort:bool = True) -> nx.Graph:
+        if not sort:
+            return self.nx_graph
+        else:
+            # Return a graph with sorted nodes (assuming vertices are integers)
+            sorted_graph = nx.Graph()
+            sorted_nodes = sorted(self.nx_graph.nodes())
+            sorted_graph.add_nodes_from(sorted_nodes)
+            sorted_graph.add_edges_from(self.nx_graph.edges())
+            # Copy node attributes
+            for node in sorted_nodes:
+                sorted_graph.nodes[node].update(self.nx_graph.nodes[node])
+            # Copy edge attributes
+            for u, v in self.nx_graph.edges():
+                sorted_graph.edges[u, v].update(self.nx_graph.edges[u, v])
+            return sorted_graph
     
     def set_endpoints_per_router(self, num_endpoints_per_router: int):
         '''

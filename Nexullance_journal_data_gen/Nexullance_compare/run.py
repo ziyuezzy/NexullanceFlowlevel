@@ -72,111 +72,111 @@ def main():
                     csvfile.flush()
 
 
-    # filename = f'Nexullance_IT.csv'
-    # with open(filename, 'w', newline='') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
-    #                         'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
+    filename = f'Nexullance_IT.csv'
+    with open(filename, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
+                            'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
 
-    #     for topo_name, configs in Topo_config.items():
-    #         for V, D in configs:
-    #             EPR = (D+1)//2
-    #             exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
+        for topo_name, configs in Topo_config.items():
+            for V, D in configs:
+                EPR = (D+1)//2
+                exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
                 
-    #             # define traffic patterns
-    #             Demand_matrices=dict()
-    #             Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
-    #             Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
+                # define traffic patterns
+                Demand_matrices=dict()
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
-    #             for traffic_name, M_EPs in Demand_matrices.items():
-    #                 result = exp_container.run_and_profile_nexullance_IT(M_EPs, traffic_name, num_rep)
-    #                 csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
-    #                                     result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
-    #                 csvfile.flush()
+                for traffic_name, M_EPs in Demand_matrices.items():
+                    result = exp_container.run_and_profile_nexullance_IT(M_EPs, traffic_name, num_rep)
+                    csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
+                                        result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
+                    csvfile.flush()
 
-    # filename = f'Nexullance_MP_APST_4.csv'
-    # with open(filename, 'w', newline='') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
-    #                         'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
+    filename = f'Nexullance_MP_APST_4.csv'
+    with open(filename, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
+                            'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
 
-    #     for topo_name, configs in Topo_config.items():
-    #         for V, D in configs:
-    #             EPR = (D+1)//2
-    #             exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
+        for topo_name, configs in Topo_config.items():
+            for V, D in configs:
+                EPR = (D+1)//2
+                exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
                 
-    #             # define traffic patterns
-    #             Demand_matrices=dict()
-    #             Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
-    #             Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
+                # define traffic patterns
+                Demand_matrices=dict()
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
-    #             for traffic_name, M_EPs in Demand_matrices.items():
-    #                 result = exp_container.run_and_profile_nexullance_MP(4, M_EPs, traffic_name, num_rep)
-    #                 csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
-    #                                     result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
-    #                 csvfile.flush()
+                for traffic_name, M_EPs in Demand_matrices.items():
+                    result = exp_container.run_and_profile_nexullance_MP(4, M_EPs, traffic_name, num_rep)
+                    csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
+                                        result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
+                    csvfile.flush()
 
-    # filename = f'Nexullance_MP_ASP.csv'
-    # with open(filename, 'w', newline='') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
-    #                         'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
+    filename = f'Nexullance_MP_ASP.csv'
+    with open(filename, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
+                            'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
 
-    #     for topo_name, configs in Topo_config.items():
-    #         for V, D in configs:
-    #             EPR = (D+1)//2
-    #             exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
+        for topo_name, configs in Topo_config.items():
+            for V, D in configs:
+                EPR = (D+1)//2
+                exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
                 
-    #             # define traffic patterns
-    #             Demand_matrices=dict()
-    #             Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
-    #             Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
+                # define traffic patterns
+                Demand_matrices=dict()
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
-    #             for traffic_name, M_EPs in Demand_matrices.items():
-    #                 result = exp_container.run_and_profile_nexullance_MP(0, M_EPs, traffic_name, num_rep)
-    #                 csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
-    #                                     result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
-    #                 csvfile.flush()
+                for traffic_name, M_EPs in Demand_matrices.items():
+                    result = exp_container.run_and_profile_nexullance_MP(0, M_EPs, traffic_name, num_rep)
+                    csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
+                                        result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
+                    csvfile.flush()
 
-    # filename = f'Nexullance_OPT.csv'
-    # with open(filename, 'w', newline='') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
-    #                         'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
+    filename = f'Nexullance_OPT.csv'
+    with open(filename, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['topo', 'V', 'D', 'EPR', 'traffic', 'ave_phi', 'std_phi', 'ave_time[s]', 'std_time[s]', 
+                            'ave_PeakRAM[B]', 'std_PeakRAM[B]'])
 
-    #     for topo_name, configs in Topo_config.items():
-    #         for V, D in configs:
-    #             if V > 50: # skip large networks for this formulation.
-    #                 continue
-    #             EPR = (D+1)//2
-    #             exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
+        for topo_name, configs in Topo_config.items():
+            for V, D in configs:
+                if V > 50: # skip large networks for this formulation.
+                    continue
+                EPR = (D+1)//2
+                exp_container = nexullance_exp_container(topo_name, V, D, EPR, Cap_core=Cap_core, Cap_access=Cap_access)
                 
-    #             # define traffic patterns
-    #             Demand_matrices=dict()
-    #             Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
-    #             Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
-    #             Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
-    #             Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
+                # define traffic patterns
+                Demand_matrices=dict()
+                Demand_matrices["uniform"]=gl.generate_uniform_traffic_demand_matrix(V, EPR)
+                Demand_matrices["shift-half"]=gl.generate_shift_half_traffic_demand_matrix(V, EPR)
+                Demand_matrices["nearst-neighbour"]=gl.generate_diagonal_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["shift-1"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 1)
+                Demand_matrices["router-cluster"]=gl.generate_uniform_cluster_demand_matrix(V, EPR, 4)
+                Demand_matrices["random-permute"]=gl.generate_shift_traffic_demand_matrix(V, EPR, 0)
 
-    #             for traffic_name, M_EPs in Demand_matrices.items():
-    #                 result = exp_container.run_and_profile_nexullance_OPT(M_EPs, traffic_name, num_rep)
-    #                 csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
-    #                                     result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
-    #                 csvfile.flush()
+                for traffic_name, M_EPs in Demand_matrices.items():
+                    result = exp_container.run_and_profile_nexullance_OPT(M_EPs, traffic_name, num_rep)
+                    csvwriter.writerow([topo_name, V, D, EPR, traffic_name, result["ave_phi"], result["std_phi"],
+                                        result["ave_time[s]"], result["std_time[s]"], result["ave_PeakRAM[B]"], result["std_PeakRAM[B]"]])
+                    csvfile.flush()
 
 
 if __name__ == '__main__':
